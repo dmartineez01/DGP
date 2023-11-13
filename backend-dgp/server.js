@@ -71,13 +71,32 @@ app.get('/alumnos', (req, res) => {
     });
 });
 
+// En tu archivo de rutas de Node.js
+
+app.get('/alumnos/:id', (req, res) => {
+    const { id } = req.params;
+    db.query('SELECT * FROM alumnos WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            res.status(500).send("Error en la consulta");
+            return;
+        }
+
+        if (results.length > 0) {
+            res.json(results[0]);
+        } else {
+            res.status(404).send("Alumno no encontrado");
+        }
+    });
+});
+
 // Ruta para agregar un nuevo alumno
 app.post('/alumnos', (req, res) => {
-    console.log("Holiwi"); // Cambiamos print a console.log
-    // Asumiendo que el cuerpo de la solicitud contiene 'nombre', 'imagen', 'texto', 'audio'
-    const { nombre, imagen, texto, audio } = req.body;
-    db.query('INSERT INTO alumnos (nombre, imagen, texto, audio) VALUES (?, ?, ?, ?)', 
-    [nombre, imagen, texto, audio], (err, results) => {
+
+    const { nombre, password, imagen, texto, audio } = req.body;
+    console.log('Recibido:', { nombre, password, imagen, texto, audio }); // Para depuración
+
+    db.query('INSERT INTO alumnos (nombre, password, imagen, texto, audio) VALUES (?, ?, ?, ?, ?)', 
+    [nombre, password, imagen, texto, audio], (err, results) => {
         if (err) {
             res.status(500).send("Error al insertar alumno");
             return;
@@ -86,7 +105,34 @@ app.post('/alumnos', (req, res) => {
     });
 });
 
+app.delete('/alumnos/:id', (req, res) => {
+    const { id } = req.params;
 
+    db.query('DELETE FROM alumnos WHERE id = ?', [id], (err, results) => {
+        if (err) {
+            res.status(500).send("Error al eliminar alumno");
+            return;
+        }
+        res.json({ status: 'success', message: 'Alumno eliminado exitosamente' });
+    });
+});
+
+
+app.put('/alumnos/:id', (req, res) => {
+    const { id } = req.params;
+    const { nombre, Imagen, Texto, Audio, password } = req.body;
+
+    db.query('UPDATE alumnos SET nombre = ?, Imagen = ?, Texto = ?, Audio = ?, password = ? WHERE id = ?',
+        [nombre, Imagen, Texto, Audio, password, id],
+        (err, results) => {
+            if (err) {
+                res.status(500).send("Error en la actualización");
+                return;
+            }
+            res.json({ status: 'success', message: 'Datos actualizados correctamente' });
+        }
+    );
+});
 
 //----------------------- CREACION DE TAREAS Y ELEMENTO TAREAS -------------------------------//
 
@@ -136,7 +182,6 @@ app.get('/tareas/:id/elementos', (req, res) => {
 
 // ...
 
-// Ruta para asignar un Material a un Alumno
 app.post('/alumnos/:alumnoId/asignar-material', (req, res) => {
     const { tarea_id } = req.body;
     const alumno_id = req.params.alumnoId;
@@ -145,9 +190,12 @@ app.post('/alumnos/:alumnoId/asignar-material', (req, res) => {
         if (error) {
             return res.status(500).json({ error });
         }
-        res.json({ success: true, message: 'Material asignado correctamente' });
+        const insertId = results.insertId; // Obtener el ID de la tarea creada
+        res.json({ success: true, message: 'Material asignado correctamente', id: insertId });
     });
 });
+
+
 
 // Ruta para obtener Materiales Asignados a un Alumno
 app.get('/alumnos/:alumnoId/materiales-asignados', (req, res) => {
@@ -186,7 +234,9 @@ app.post('/alumnos/:alumnoId/asignar-tarea-fija', (req, res) => {
         if (error) {
             return res.status(500).json({ error });
         }
-        res.json({ success: true, message: 'Tarea Fija asignada correctamente' });
+        const insertId = results.insertId; // Obtener el ID de la tarea creada
+        res.json({ success: true, message: 'Tarea Fija asignado correctamente', id: insertId });
+        
     });
 });
 
@@ -213,7 +263,8 @@ app.post('/alumnos/:alumnoId/asignar-tarea-comanda', (req, res) => {
         if (error) {
             return res.status(500).json({ error });
         }
-        res.json({ success: true, message: 'Tarea Comanda asignada correctamente' });
+        const insertId = results.insertId; // Obtener el ID de la tarea creada
+        res.json({ success: true, message: 'Comanda asignada correctamente', id: insertId });
     });
 });
 
