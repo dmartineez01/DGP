@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:frontend_app/login.dart';
 
 class MenuScreen extends StatelessWidget {
   final ZoomDrawerController controller;
@@ -18,9 +19,9 @@ class MenuScreen extends StatelessWidget {
               'Administrador',
               style: TextStyle(fontSize: 20),
             ),
-            accountEmail: Text("admin@correo.ugr.es"), 
+            accountEmail: Text("admin@correo.ugr.es"),
             currentAccountPicture: CircleAvatar(
-              //backgroundImage: AssetImage('assets/profile_picture.png'),
+              backgroundImage: AssetImage('assets/images/admin-profile.jpg'),
               backgroundColor: Colors.white,
             ),
             decoration: BoxDecoration(color: Colors.blue[700]),
@@ -28,20 +29,26 @@ class MenuScreen extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                _buildMenuItem(Icons.home, 'Administradores', 0),
-                _buildMenuItem(Icons.show_chart, 'Alumnos', 1),
-                _buildMenuItem(Icons.trending_up, 'Tareas', 2),
-                _buildMenuItem(Icons.settings, 'Configuración', 6),
-                
+                _buildMenuItem(
+                    Icons.admin_panel_settings, 'Administradores', 0),
+                _buildMenuItem(Icons.school, 'Alumnos', 1),
+                _buildMenuItem(Icons.assignment, 'Tareas', 2),
+                _buildMenuItem(Icons.settings, 'Configuración', 3),
               ],
             ),
           ),
-          Divider(thickness: 2,),  
+          Divider(
+            thickness: 2,
+          ),
           ListTile(
             leading: Icon(Icons.exit_to_app, color: Colors.white),
             title: Text('Salir', style: TextStyle(color: Colors.white)),
             onTap: () {
-              // Lógica para salir de la aplicación
+              // Lógica para salir de la aplicación y volver al LoginPage
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (Route<dynamic> route) => false,
+              );
             },
           ),
         ],
@@ -54,8 +61,8 @@ class MenuScreen extends StatelessWidget {
       leading: Icon(icon, color: Colors.white),
       title: Text(title, style: TextStyle(color: Colors.white)),
       onTap: () {
-        onItemTapped(index);  
-        controller.close!();  
+        onItemTapped(index);
+        controller.close!();
       },
     );
   }

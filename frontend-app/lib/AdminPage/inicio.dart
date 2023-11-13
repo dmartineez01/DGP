@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_app/AdminPage/Config/configPage.dart';
 import '../Widgets/menuController.dart';
 import '../network.dart';
 
@@ -33,7 +34,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final pages = [
       AdministradoresPage(),
       AlumnosPage(),
-      TareasPage()
+      TareasPage(),
+      ConfigPage()
     ]; // lista de páginas
 
     return ZoomDrawer(

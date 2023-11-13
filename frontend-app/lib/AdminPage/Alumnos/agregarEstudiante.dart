@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../network.dart';
+
 class AddStudentPage extends StatefulWidget {
   @override
   _AddStudentPageState createState() => _AddStudentPageState();
@@ -10,27 +12,22 @@ class AddStudentPage extends StatefulWidget {
 class _AddStudentPageState extends State<AddStudentPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController _nameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
   bool _isImage = true;
   bool _isText = false;
   bool _isAudio = false;
 
   Future<void> _addStudent() async {
-    final studentData = {
-      "nombre": _nameController.text,
-      "imagen": _isImage ? 1 : 0, // 1 para verdadero, 0 para falso
-      "texto": _isText ? 1 : 0,
-      "audio": _isAudio ? 1 : 0,
-    };
-
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:3000/alumnos'),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(studentData),
+    try {
+    bool added = await addStudent(
+      _nameController.text,
+      _passwordController.text,
+      _isImage, 
+      _isText,
+      _isAudio,
     );
 
-    if (response.statusCode == 200) {
-      final responseBody = json.decode(response.body);
-      if (responseBody['status'] == 'success') {
+      if (added) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Alumno añadido exitosamente')),
         );
@@ -40,7 +37,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
           SnackBar(content: Text('Error al añadir alumno')),
         );
       }
-    } else {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error al conectar con el servidor')),
       );
@@ -61,6 +58,11 @@ class _AddStudentPageState extends State<AddStudentPage> {
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Nombre'),
                 validator: (value) => value!.isEmpty ? 'El nombre es obligatorio' : null,
+              ),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Contraseña'),
+                validator: (value) => value!.isEmpty ? 'La contraseña es obligatoria' : null,
               ),
               SwitchListTile(
                 title: Text('Imagen'),

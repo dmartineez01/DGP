@@ -24,6 +24,68 @@ Future<List<dynamic>> fetchAlumnos() async {
   }
 }
 
+Future<dynamic> fetchAlumno(int id) async {
+  final url = Uri.parse('http://10.0.2.2:3000/alumnos/$id');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load student data');
+  }
+}
+
+
+Future<bool> addStudent(String nombre, String password, bool imagen, bool texto, bool audio) async {
+  final url = Uri.parse('http://10.0.2.2:3000/alumnos');
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      'nombre': nombre,
+      'password': password,
+      'imagen': imagen ? 1 : 0,  // Clave en minúsculas
+      'texto': texto ? 1 : 0,    // Clave en minúsculas
+      'audio': audio ? 1 : 0,    // Clave en minúsculas
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final responseBody = json.decode(response.body);
+    return responseBody['status'] == 'success';
+  } else {
+    throw Exception('Failed to add student');
+  }
+}
+
+Future<bool> deleteAlumno(int id) async {
+  final url = Uri.parse('http://10.0.2.2:3000/alumnos/$id');
+  final response = await http.delete(url);
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('Failed to delete student');
+  }
+}
+
+Future<bool> updateAlumno(int id, String nombre, int imagen, int texto, int audio, String password) async {
+  final url = Uri.parse('http://10.0.2.2:3000/alumnos/$id');
+  final response = await http.put(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      'nombre': nombre,
+      'password': password,
+      'Imagen': imagen,
+      'Texto': texto,
+      'Audio': audio,
+    }),
+  );
+  return response.statusCode == 200;
+}
+
+
 // Función para obtener tareas
 Future<List<Tarea>> fetchTareas() async {
   final response = await http.get(Uri.parse('http://10.0.2.2:3000/tareas'));
@@ -107,7 +169,7 @@ Future<ElementoTarea> addElementoTarea(String pictograma, String descripcion, St
   }
 }
 
-Future<bool> assignTaskToStudent(int alumnoId, int tareaId, String tipo) async {
+Future<int?> assignTaskToStudent(int alumnoId, int tareaId, String tipo) async {
   final response;
   if (tipo == "Material") {
     response = await http.post(
@@ -140,13 +202,14 @@ Future<bool> assignTaskToStudent(int alumnoId, int tareaId, String tipo) async {
     );
   } else {
     // Tipo de tarea desconocido, maneja el error como consideres apropiado
-    return false;
+    return null;
   }
 
   if (response.statusCode == 200) {
-    return true;
+    final data = json.decode(response.body);
+    return data['id']; // Suponiendo que el ID es retornado bajo la clave 'id'
   } else {
-    return false;
+    return null;
   }
 }
 

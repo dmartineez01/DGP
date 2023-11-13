@@ -17,7 +17,8 @@ class _AlumnosPageState extends State<AlumnosPage> {
   @override
   void initState() {
     super.initState();
-    futureAlumnos = fetchAlumnos(); // Asegúrate de que esta función esté actualizada con la nueva estructura de datos
+    futureAlumnos =
+        fetchAlumnos(); // Asegúrate de que esta función esté actualizada con la nueva estructura de datos
     _searchController.addListener(() {
       _filterAlumnos(_searchController.text);
     });
@@ -35,36 +36,41 @@ class _AlumnosPageState extends State<AlumnosPage> {
       });
     } else {
       setState(() {
-        _filteredAlumnos = null; // Clear the filtered list if the query is empty
+        _filteredAlumnos =
+            null; // Clear the filtered list if the query is empty
       });
     }
   }
 
   DataRow _createRow(dynamic alumno) {
-  return DataRow(
-    cells: [
-      DataCell(Text(alumno['id'].toString())),
-      DataCell(Text(alumno['nombre'].toString())),
-      DataCell(Text(alumno['Imagen'] == 1 ? "Sí" : "No")), // Cambiado aquí
-      DataCell(Text(alumno['Texto'] == 1 ? "Sí" : "No")), // Cambiado aquí
-      DataCell(Text(alumno['Audio'] == 1 ? "Sí" : "No")), // Cambiado aquí
-      DataCell(IconButton(
-        icon: Icon(Icons.edit),
-        onPressed: () {
-          // Navega a AlumnoAdminPage pasando los datos del alumno
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => AlumnoAdminPage(alumno: alumno),
-            ),
-          );
-        },
-      )),
-    ],
-  );
-}
-
-
-
+    return DataRow(
+      cells: [
+        DataCell(Text(alumno['id'].toString())),
+        DataCell(Text(alumno['nombre'].toString())),
+        DataCell(Text(alumno['password'].toString())),
+        DataCell(Text(alumno['Imagen'] == 1 ? "Sí" : "No")), // Cambiado aquí
+        DataCell(Text(alumno['Texto'] == 1 ? "Sí" : "No")), // Cambiado aquí
+        DataCell(Text(alumno['Audio'] == 1 ? "Sí" : "No")), // Cambiado aquí
+        DataCell(IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () {
+            Navigator.of(context)
+                .push(
+              MaterialPageRoute(
+                builder: (context) => AlumnoAdminPage(alumno: alumno),
+              ),
+            )
+                .then((_) {
+              // Recarga los alumnos después de regresar de la página de edición
+              setState(() {
+                futureAlumnos = fetchAlumnos();
+              });
+            });
+          },
+        )),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,35 +111,42 @@ class _AlumnosPageState extends State<AlumnosPage> {
               ),
             ),
             SizedBox(height: 20),
-           Expanded(
-  child: FutureBuilder<List<dynamic>>(
-    future: futureAlumnos,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.done) {
-        if (snapshot.hasData) {
-          var alumnosToShow = _filteredAlumnos ?? snapshot.data!;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Nombre')),
-                DataColumn(label: Text('Imagen')),
-                DataColumn(label: Text('Texto')),
-                DataColumn(label: Text('Audio')),
-                DataColumn(label: Text('Editar')),
-              ],
-              rows: alumnosToShow.map((alumno) => _createRow(alumno)).toList(),
+            Expanded(
+              child: FutureBuilder<List<dynamic>>(
+                future: futureAlumnos,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData) {
+                      var alumnosToShow = _filteredAlumnos ?? snapshot.data!;
+                      return SingleChildScrollView(
+                        scrollDirection: Axis
+                            .horizontal, // Desplazamiento horizontal para la tabla
+                        child: SingleChildScrollView(
+                          child: DataTable(
+                            // Desplazamiento vertical para las filas de la tabla
+                            columns: const [
+                              DataColumn(label: Text('ID')),
+                              DataColumn(label: Text('Nombre')),
+                              DataColumn(label: Text('Contraseña')),
+                              DataColumn(label: Text('Imagen')),
+                              DataColumn(label: Text('Texto')),
+                              DataColumn(label: Text('Audio')),
+                              DataColumn(label: Text('Editar')),
+                            ],
+                            rows: alumnosToShow
+                                .map((alumno) => _createRow(alumno))
+                                .toList(),
+                          ),
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text("${snapshot.error}"));
+                    }
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
             ),
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text("${snapshot.error}"));
-        }
-      }
-      return const Center(child: CircularProgressIndicator());
-    },
-  ),
-),
             SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () async {

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../Modelos/ElementoTarea.dart';
+import 'package:frontend_app/Modelos/ElementoTarea.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import '../../network.dart';
 
 class AjustarCantidadesPage extends StatefulWidget {
   final int tareaId;
+  final int materialAsignadaId;
 
-  AjustarCantidadesPage({Key? key, required this.tareaId}) : super(key: key);
+  AjustarCantidadesPage({Key? key, required this.tareaId, required this.materialAsignadaId}) : super(key: key);
 
   @override
   _AjustarCantidadesPageState createState() => _AjustarCantidadesPageState();
@@ -19,6 +23,32 @@ class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
     // Limpieza de los controladores al salir de la pantalla
     _controllers.forEach((key, controller) => controller.dispose());
     super.dispose();
+  }
+
+  Future<bool> asignarCantidadMaterialElemento(int materialAsignadaId, int elementoTareaId, int cantidad) async {
+    final url = Uri.parse('http://10.0.2.2:3000/material-elemento');
+    final headers = {"Content-Type": "application/json"};
+    final body = json.encode({
+      "materialAsignada_id": materialAsignadaId,
+      "elementoTarea_id": elementoTareaId,
+      "cantidad": cantidad,
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final success = responseData['success'] as bool;
+        return success;
+      } else {
+        // Handle error cases, e.g., by throwing an exception or returning false.
+        return false;
+      }
+    } catch (e) {
+      // Handle network-related errors, e.g., by throwing an exception or returning false.
+      return false;
+    }
   }
 
   @override
@@ -37,8 +67,8 @@ class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
                 itemBuilder: (context, index) {
                   var elemento = snapshot.data![index];
                   var controller = _controllers.putIfAbsent(
-                    elemento.id, 
-                    () => TextEditingController(text: '1') // Inicializa con 1 por defecto
+                    elemento.id,
+                    () => TextEditingController(text: '1'), // Inicializa con 1 por defecto
                   );
 
                   return Card(
@@ -89,7 +119,8 @@ class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
                             onPressed: () async {
                               var cantidad = int.tryParse(controller.text);
                               if (cantidad != null) {
-                                final success = await asignarCantidadMaterialElemento(elemento.id, cantidad);
+                                final success = await asignarCantidadMaterialElemento(
+                                    widget.materialAsignadaId, elemento.id, cantidad);
                                 if (success) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text('Cantidad guardada con éxito')),
@@ -121,13 +152,5 @@ class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
         },
       ),
     );
-  }
-
-  Future<bool> asignarCantidadMaterialElemento(int elementoId, int cantidad) async {
-    // Llamada a la API o lógica para guardar la cantidad en el elemento correspondiente
-    // Esta función podría enviar las cantidades a tu servidor o base de datos
-    print('Guardar cantidad $cantidad para el elemento $elementoId');
-    // Simulación de éxito
-    return true;
   }
 }
