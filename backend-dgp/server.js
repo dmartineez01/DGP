@@ -89,6 +89,40 @@ app.get('/alumnos/:id', (req, res) => {
     });
 });
 
+app.get('/alumnos/:id/tareas-asignadas', (req, res) => {
+    const { id } = req.params;
+    const query = `
+        SELECT 
+            tareas.*, 
+            ComandaAsignada.id AS comandaAsignadaId,
+            FijaAsignada.id AS fijaAsignadaId,
+            MaterialAsignada.id AS materialAsignadaId
+        FROM 
+            tareas
+        LEFT JOIN ComandaAsignada ON tareas.id = ComandaAsignada.tarea_id
+        LEFT JOIN FijaAsignada ON tareas.id = FijaAsignada.tarea_id
+        LEFT JOIN MaterialAsignada ON tareas.id = MaterialAsignada.tarea_id
+        WHERE 
+            ComandaAsignada.alumno_id = ?
+            OR FijaAsignada.alumno_id = ?
+            OR MaterialAsignada.alumno_id = ?;
+    `;
+
+    db.query(query, [id, id, id], (err, results) => {
+        if (err) {
+            res.status(500).send("Error en la consulta: " + err.message);
+            return;
+        }
+        res.json(results);
+    });
+});
+
+
+
+
+
+
+
 // Ruta para agregar un nuevo alumno
 app.post('/alumnos', (req, res) => {
 
@@ -148,6 +182,7 @@ app.get('/tareas', (req, res) => {
 app.post('/tareas', (req, res) => {
     const { nombre, tipo } = req.body;
 
+    console.log('Agrego esta tarea: nombre:' + nombre + " tipo: " + tipo);
     db.query('INSERT INTO tareas (nombre, tipo) VALUES (?, ?)', [nombre, tipo], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -281,6 +316,42 @@ app.get('/alumnos/:alumnoId/tareas-comandas-asignadas', (req, res) => {
     });
 });
 
+//------------------------------------------
+
+app.get('/aulas', (req, res) => {
+    db.query('SELECT * FROM Aula', (error, results) => {
+        if (error) {
+            console.error("Error al obtener aulas:", error);
+            return res.status(500).json({ error: "Error al obtener aulas" });
+        }
+
+        // Aquí se añade el console.log para ver los resultados
+        console.log("Resultados de la consulta de aulas:", results);
+
+        res.json({ success: true, aulas: results });
+    });
+});
+
+// En tu archivo server.js (o el archivo donde tengas tu servidor Express)
+
+app.post('/comanda-elemento', (req, res) => {
+    const { comandaAsignada_id, elementoTarea_id, cantidad, id_aula } = req.body;
+
+    // Asegúrate de que todos los campos necesarios estén presentes
+    if (!comandaAsignada_id || !elementoTarea_id || !cantidad || !id_aula) {
+        return res.status(400).send('Faltan datos requeridos');
+    }
+
+    const query = 'INSERT INTO ComandaElemento (comandaAsignada_id, elementoTarea_id, cantidad, id_aula) VALUES (?, ?, ?, ?)';
+    
+    db.query(query, [comandaAsignada_id, elementoTarea_id, cantidad, id_aula], (error, results) => {
+        if (error) {
+            console.error('Error al insertar en ComandaElemento:', error);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        res.json({ success: true, message: 'ComandaElemento creado exitosamente', id: results.insertId });
+    });
+});
 
 
 
