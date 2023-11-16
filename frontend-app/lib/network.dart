@@ -242,32 +242,49 @@ Future<bool> asignarCantidadMaterialElemento(int materialAsignadaId, int element
 
 
 
-// Función para obtener tareas asignadas a un alumno
 Future<List<dynamic>> fetchAllAssignedTasksForStudent(int alumnoId) async {
-  final List<dynamic> allTasks = [];
-
-  // Obtener tareas de tipo Material
-  final materialTasksResponse = await http.get(Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/materiales-asignados'));
-  if (materialTasksResponse.statusCode == 200) {
-    final materialTasks = json.decode(materialTasksResponse.body);
-    allTasks.addAll(materialTasks['materialesAsignados']);
+  final uri = Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/tareas-asignadas');
+  final response = await http.get(uri);
+  print(response.body);
+  if (response.statusCode == 200) {
+    final List<dynamic> tasks = json.decode(response.body);
+    return tasks;
+  } else {
+    throw Exception('Failed to load tasks');
   }
+}
 
-  // Obtener tareas de tipo Tarea Fija
-  final fijaTasksResponse = await http.get(Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/tareas-fijas-asignadas'));
-  print(fijaTasksResponse.body);
-  if (fijaTasksResponse.statusCode == 200) {
-    final fijaTasks = json.decode(fijaTasksResponse.body);
-    allTasks.addAll(fijaTasks['tareasFijasAsignadas']);
+
+Future<List<dynamic>> fetchAulas() async {
+  final uri = Uri.parse('http://10.0.2.2:3000/aulas');
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> decodedResponse = json.decode(response.body);
+    final List<dynamic> aulas = decodedResponse['aulas'];
+    return aulas;
+  } else {
+    throw Exception('Failed to load aulas');
   }
+}
 
-  // Obtener tareas de tipo Tarea Comanda
-  final comandaTasksResponse = await http.get(Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/tareas-comandas-asignadas'));
-  if (comandaTasksResponse.statusCode == 200) {
-    final comandaTasks = json.decode(comandaTasksResponse.body);
-    allTasks.addAll(comandaTasks['tareasComandasAsignadas']);
+Future<bool> createComandaElemento(int comandaAsignadaId, int elementoTareaId, int cantidad, int idAula) async {
+  final url = Uri.parse('http://10.0.2.2:3000/comanda-elemento');
+  final headers = {"Content-Type": "application/json"};
+  final body = json.encode({
+    "comandaAsignada_id": comandaAsignadaId,
+    "elementoTarea_id": elementoTareaId,
+    "cantidad": cantidad,
+    "id_aula": idAula,
+  });
+
+  final response = await http.post(url, headers: headers, body: body);
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    print('Failed to create ComandaElemento: ${response.body}');
+    return false;
   }
-
-  return allTasks;
 }
 

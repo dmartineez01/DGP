@@ -67,3 +67,34 @@ class MenuScreen extends StatelessWidget {
     );
   }
 }
+
+class botonSalir extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  botonSalir({Key? key, this.title = 'Salir', this.subtitle = 'Volver atrás'}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(), // Vuelve a la pantalla anterior
+      child: Card(
+        color: Colors.red[100],
+        elevation: 4.0,
+        margin: EdgeInsets.all(16.0),
+        child: ListTile(
+          leading: Icon(Icons.arrow_back, size: 56.0), // Pictograma de salir
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(subtitle),
+        ),
+      ),
+    );
+  }
+}
+

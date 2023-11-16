@@ -26,6 +26,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   String _selectedTaskType = "Fija";
   List<ElementoTarea> _taskElements = [];
   AudioPlayer _audioPlayer = AudioPlayer();
+  final TextEditingController _taskNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,15 +40,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
           padding: EdgeInsets.all(16.0),
           children: [
             TextFormField(
-              decoration: InputDecoration(labelText: 'Nombre de la tarea'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, introduce un nombre';
-                }
-                _taskName = value;
-                return null;
-              },
-            ),
+  controller: _taskNameController,
+  decoration: InputDecoration(labelText: 'Nombre de la tarea'),
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor, introduce un nombre';
+    }
+    return null;
+  },
+),
+
             DropdownButtonFormField<String>(
               hint: Text("Selecciona un tipo"),
               value: _selectedTaskType,
@@ -200,8 +202,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
   if (_taskFormKey.currentState!.validate()) {
     try {
 
-      print(_taskName + _selectedTaskType);
-      Tarea newTask = await addTarea(_taskName, _selectedTaskType);
+      print(_taskNameController.text + _selectedTaskType);
+      Tarea newTask = await addTarea(_taskNameController.text, _selectedTaskType);
       
       for (var element in _taskElements) {
         await addElementoTarea(element.pictograma, element.descripcion, element.sonido, element.video, newTask.id);

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_app/AlumnoPage/alumnoInicio.dart';
+import 'package:frontend_app/Logins/loginImageAlumno.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'Logins/loginPasswordAlumno.dart';
 import 'network.dart'; // Asegúrate de que esta importación es correcta y que el archivo network.dart tiene las funciones necesarias
 import 'dart:math';
 
@@ -17,14 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _isStudentExpanded = false;
 
   late Future<List<dynamic>> futureAlumnos;
-  List<String> imageOptions = [
-    "contraseña1.jpg",
-    "contraseña2.jpg",
-    "contraseña3.jpg",
-    "contraseña4.jpg"
-  ];
-  List<int> selectedImages = [];
-  List<int> selectedImageIndices = [];
 
   List<String> imagenPerfil = [
     "heroe1.jpg",
@@ -33,6 +27,19 @@ class _LoginPageState extends State<LoginPage> {
     "heroe4.jpg",
     "heroe5.jpg"
   ];
+
+  Color _getColorForAlumno(int alumnoId) {
+    // Puedes ajustar la lógica para asignar colores
+    List<Color> colors = [
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.yellow,
+      Colors.orange,
+      Colors.purple
+    ];
+    return colors[alumnoId % colors.length];
+  }
 
   @override
   void initState() {
@@ -62,162 +69,68 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loginAlumno(dynamic alumno) async {
     if (alumno['Texto'] == 1) {
-      _showTextLoginDialog(alumno);
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => LoginPasswordAlumno(
+          alumno: alumno,
+          image: _getImageForAlumno(
+              alumno['id']), // Cambiado de alumno.id a alumno['id']
+        ),
+      ));
     } else if (alumno['Imagen'] == 1) {
-      _showImageLoginDialog(alumno);
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => LoginImageAlumno(
+          alumno: alumno,
+          image: _getImageForAlumno(
+              alumno['id']), // Cambiado de alumno.id a alumno['id']
+        ),
+      ));
     }
-    // Agrega lógica para 'Audio' si es necesario
   }
 
-  void _showTextLoginDialog(dynamic alumno) {
-    TextEditingController _passwordController = TextEditingController();
+   Widget _buildStudentLogin() {
+    return FutureBuilder<List<dynamic>>(
+      future: futureAlumnos,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            return Column(
+              children: snapshot.data!.map((alumno) => _buildAlumnoTile(alumno)).toList(),
+            );
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          }
+        }
+        return CircularProgressIndicator();
+      },
+    );
+  }
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Inicio de Sesión para ${alumno['nombre']}'),
-          content: TextField(
-            controller: _passwordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: 'Contraseña',
-              border: OutlineInputBorder(),
+  Widget _buildAlumnoTile(dynamic alumno) {
+    return Card(
+      color: _getColorForAlumno(alumno['id']),
+      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        leading: ClipOval(
+          child: Container(
+            width: 120,
+            height: 70,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                image: AssetImage("assets/images/${_getImageForAlumno(alumno['id'])}"),
+                fit: BoxFit.contain,
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Iniciar Sesión'),
-              onPressed: () {
-                String enteredPassword = _passwordController.text;
-                if (enteredPassword == alumno['password']) {
-                  Navigator.of(context).pop();
-                  // Agregar un print para depurar la ruta de la imagen
-                  // Obtén la ruta de la imagen del alumno
-  String imagePath = _getImageForAlumno(alumno['id']);
-
-  // Navega a AlumnoInicioPage con la imagen correcta
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => AlumnoInicioPage(
-        alumno: alumno,
-        image: imagePath,
+        ),
+        title: Text(alumno['nombre'], style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20)),
+        onTap: () => _loginAlumno(alumno),
       ),
-    ),
-  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Contraseña incorrecta')),
-                  );
-                }
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 
-  void _showImageLoginDialog(dynamic alumno) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          // Utiliza StatefulBuilder para manejar el estado dentro del diálogo
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: Text('Seleccione las imágenes en orden'),
-              content: Container(
-                width: double.maxFinite,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  itemCount: imageOptions.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          // Asegúrate de llamar a setState dentro del StatefulBuilder
-                          if (selectedImageIndices.contains(index)) {
-                            selectedImageIndices.remove(index);
-                          } else {
-                            selectedImageIndices.add(index);
-                          }
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: selectedImageIndices.contains(index)
-                                ? Colors.green
-                                : Colors.white,
-                            width: selectedImageIndices.contains(index) ? 5 : 1,
-                          ),
-                        ),
-                        child: Image.asset(
-                            'assets/images/${imageOptions[index]}',
-                            fit: BoxFit.cover),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: Text('Cancelar'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                TextButton(
-                  child: Text('Confirmar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _checkImageSequence(alumno, selectedImageIndices);
-                    selectedImageIndices.clear();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _checkImageSequence(dynamic alumno, List<int> selectedIndices) {
-    // Convertir la lista de índices seleccionados en una cadena para comparar
-    String selectedSequence = selectedIndices.join(',');
-
-    if (selectedSequence == alumno['password']) {
-      // Agregar un print para depurar la ruta de la imagen
-      // Obtén la ruta de la imagen del alumno
-  String imagePath = _getImageForAlumno(alumno['id']);
-
-  // Navega a AlumnoInicioPage con la imagen correcta
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => AlumnoInicioPage(
-        alumno: alumno,
-        image: imagePath,
-      ),
-    ),
-  );
-    } else {
-      // Contraseña incorrecta
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Secuencia de imágenes incorrecta')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,77 +189,23 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     isExpanded: _isAdminExpanded,
                   ),
-                  ExpansionPanel(
-                    headerBuilder: (context, isExpanded) => Text(
-                      'Alumnos',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.patrickHand(
-                          fontSize: 30, color: Colors.black),
-                    ),
-                    body: _buildStudentLoginBody(),
-                    isExpanded: _isStudentExpanded,
-                  ),
                 ],
               ),
+              SizedBox(height: 12.0),
+              Align(
+                alignment: Alignment.topCenter,
+                child: Text(
+                  'Alumnos',
+                  style:
+                      GoogleFonts.patrickHand(fontSize: 36, color: Colors.blue),
+                ),
+              ),
+              SizedBox(height: 12.0),
+              _buildStudentLogin(),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStudentLoginBody() {
-    return FutureBuilder<List<dynamic>>(
-      future: futureAlumnos,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                var alumno = snapshot.data![index];
-                String imageUrl = _getImageForAlumno(alumno['id']);
-                return Card(
-                  color: Colors.blue[400],
-                  elevation: 4,
-                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                  child: ListTile(
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    leading: ClipOval(
-                      child: Container(
-                        width: 90, // Tamaño del contenedor
-                        height: 90,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: AssetImage("assets/images/$imageUrl"),
-                            fit: BoxFit
-                                .contain, // Esto asegura que la imagen se ajuste correctamente
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      alumno['nombre'],
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                    onTap: () => _loginAlumno(alumno),
-                  ),
-                );
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Text("Error: ${snapshot.error}");
-          }
-        }
-        return CircularProgressIndicator();
-      },
     );
   }
 }
