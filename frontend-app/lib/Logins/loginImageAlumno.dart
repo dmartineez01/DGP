@@ -93,9 +93,9 @@ void _navigateToInicioPage() {
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Image.asset(
-                  'assets/images/${imageOptions[index]}',
-                  width: 50,
-                  height: 50,
+                  'assets/images/${imageOptions[index-1]}',
+                  width: 80,
+                  height: 80,
                 ),
               ),
               Positioned(

@@ -17,11 +17,18 @@ class TareasAlumnoPage extends StatefulWidget {
 
 class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
   List<dynamic> tareasAsignadas = [];
+  PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
     _fetchAssignedTasks();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _fetchAssignedTasks() async {
@@ -37,15 +44,13 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     }
   }
 
-  Color _getTareaColor(int id) {
-    List<Color> colors = [
-      Colors.redAccent,
-      Colors.greenAccent,
-      Colors.blueAccent,
-      Colors.orangeAccent,
-      Colors.purpleAccent,
-    ];
-    return colors[id % colors.length];
+  Color _getTareaColor(String tipo) {
+    Map<String, Color> colors = {
+      'Comanda': Colors.greenAccent,
+      'Material': Colors.blueAccent,
+      'Fija': Colors.orangeAccent,
+    };
+    return colors[tipo] ?? Colors.grey; // Color gris como valor por defecto
   }
 
   IconData _getTareaIcon(int id) {
@@ -86,77 +91,132 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
           ),
           Divider(),
           Expanded(
-            child: ListView.separated(
-              itemCount: tareasAsignadas.length,
-              itemBuilder: (BuildContext context, int index) {
-                final tarea = tareasAsignadas[index];
-                Color color = _getTareaColor(tarea['id']);
-                IconData icono = _getTareaIcon(tarea['id']);
-                String imagen = _getTareaImage(tarea['tipo']);
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: (tareasAsignadas.length / 3)
+                  .ceil(), // Calcula el número de páginas
+              itemBuilder: (BuildContext context, int pageIndex) {
+                int startIndex = pageIndex * 3;
+                int endIndex = startIndex + 3;
+                endIndex = endIndex > tareasAsignadas.length
+                    ? tareasAsignadas.length
+                    : endIndex;
 
-                return Card(
-                  color: color.withOpacity(0.3),
-                  elevation: 4.0,
-                  margin: EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: () {
-                      String tipoTarea = tarea['tipo']; // Tipo de tarea
-                      int comandaAsignadaId = tarea['comandaAsignadaId'] ??
-                          0; // Si es null, asigna 0
-                      int materialAsignadaId = tarea['materialAsignadaId'] ??
-                          0; // Si es null, asigna 0
-                      int fijaAsignadaId =
-                          tarea['fijaAsignadaId'] ?? 0; // Si es null, asigna 0
+                return Column(
+                  children: tareasAsignadas
+                      .getRange(startIndex, endIndex)
+                      .map((tarea) {
+                    Color color = _getTareaColor(tarea['tipo']);
+                    IconData icono = _getTareaIcon(tarea['id']);
+                    String imagen = _getTareaImage(tarea['tipo']);
 
-                      if (tipoTarea == 'Comanda') {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => TareaComandaAlumnoPage(
-                            tarea: tarea,
-                            comandaAsignadaId: comandaAsignadaId,
+                    return Card(
+                      color: color.withOpacity(0.3),
+                      elevation: 4.0,
+                      margin: EdgeInsets.all(8.0),
+                      child: InkWell(
+                        onTap: () {
+                          String tipoTarea = tarea['tipo']; // Tipo de tarea
+                          int comandaAsignadaId = tarea['comandaAsignadaId'] ??
+                              0; // Si es null, asigna 0
+                          int materialAsignadaId =
+                              tarea['materialAsignadaId'] ??
+                                  0; // Si es null, asigna 0
+                          int fijaAsignadaId = tarea['fijaAsignadaId'] ??
+                              0; // Si es null, asigna 0
+
+                          if (tipoTarea == 'Comanda') {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => TareaComandaAlumnoPage(
+                                tarea: tarea,
+                                comandaAsignadaId: comandaAsignadaId,
+                              ),
+                            ));
+                          } else if (tipoTarea == 'Material') {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => TareaMaterialAlumnoPage(
+                                tarea: tarea,
+                                materialAsignadaId: materialAsignadaId,
+                              ),
+                            ));
+                          } else if (tipoTarea == 'Fija') {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => TareaFijaAlumnoPage(
+                                tarea: tarea,
+                                fijaAsignadaId: fijaAsignadaId,
+                              ),
+                            ));
+                          }
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(icono, size: 40),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  tarea['nombre'],
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Image.asset(imagen, width: 100, height: 100),
+                            ],
                           ),
-                        ));
-                      } else if (tipoTarea == 'Material') {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => TareaMaterialAlumnoPage(
-                            tarea: tarea,
-                            materialAsignadaId: materialAsignadaId,
-                          ),
-                        ));
-                      } else if (tipoTarea == 'Fija') {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => TareaFijaAlumnoPage(
-                            tarea: tarea,
-                            fijaAsignadaId: fijaAsignadaId,
-                          ),
-                        ));
-                      }
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(icono, size: 40),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              tarea['nombre'],
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Image.asset(imagen, width: 100, height: 100),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }).toList(),
                 );
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return SizedBox(height: 10.0); // Espacio entre los elementos
               },
             ),
           ),
+          Padding(
+            padding: EdgeInsets.only(
+                bottom: 20.0), // Añade un espacio en la parte inferior
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary:
+                        Colors.grey, // Color rojo para el botón de retroceso
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12), // Tamaño del botón
+                  ),
+                  onPressed: () {
+                    if (_pageController.hasClients &&
+                        _pageController.page! > 0) {
+                      _pageController.previousPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  child: Icon(Icons.arrow_back, size: 30), // Icono más grande
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey, // Color verde para el botón de avance
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  onPressed: () {
+                    if (_pageController.hasClients &&
+                        _pageController.page! < (tareasAsignadas.length - 1)) {
+                      _pageController.nextPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    }
+                  },
+                  child: Icon(Icons.arrow_forward, size: 30),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );

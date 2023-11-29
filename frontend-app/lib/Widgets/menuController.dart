@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:frontend_app/AdminPage/Tareas/TareasPage.dart';
+import 'package:frontend_app/AdminPage/Tareas/tareasPendientesAdmin.dart';
 import 'package:frontend_app/login.dart';
 
 class MenuScreen extends StatelessWidget {
@@ -29,11 +31,17 @@ class MenuScreen extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                _buildMenuItem(
-                    Icons.admin_panel_settings, 'Administradores', 0),
+                _buildMenuItem(Icons.admin_panel_settings, 'Administradores', 0),
                 _buildMenuItem(Icons.school, 'Alumnos', 1),
-                _buildMenuItem(Icons.assignment, 'Tareas', 2),
-                _buildMenuItem(Icons.settings, 'Configuración', 3),
+                ExpansionTile(
+                  leading: Icon(Icons.assignment, color: Colors.white),
+                  title: Text('Tareas', style: TextStyle(color: Colors.white)),
+                  children: <Widget>[
+                    _buildMenuItem(Icons.list, 'Tareas Totales', 2), // Índice 4 para 'Tareas Totales'
+                    _buildMenuItem(Icons.hourglass_empty, 'Tareas Pendientes', 3), // Índice 5 para 'Tareas Pendientes'
+                  ],
+                ),
+                _buildMenuItem(Icons.settings, 'Configuración',4),
               ],
             ),
           ),
@@ -72,7 +80,8 @@ class botonSalir extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  botonSalir({Key? key, this.title = 'Salir', this.subtitle = 'Volver atrás'}) : super(key: key);
+  botonSalir({Key? key, this.title = 'Salir', this.subtitle = 'Volver atrás'})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -97,4 +106,3 @@ class botonSalir extends StatelessWidget {
     );
   }
 }
-

@@ -79,26 +79,33 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
               Text('Tareas Asignadas',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               Divider(),
-              ListView.separated(
-                shrinkWrap: true,
-                itemCount: tareasAsignadas.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final tarea = tareasAsignadas[index];
-                  return ListTile(
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: tarea.entries.map<Widget>((entry) {
-                        return Text(
-                          '${entry.key}: ${entry.value}',
-                          style: TextStyle(fontSize: 16),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                },
+              Divider(),
+              Container(
+                height: 250, // Límite de altura para la lista de tareas
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: AlwaysScrollableScrollPhysics(), // Permite el desplazamiento dentro del ListView
+                  itemCount: tareasAsignadas.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final tarea = tareasAsignadas[index];
+    return ListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: tarea.entries
+          .where((entry) => entry.value != null) // Filtra las entradas que no son null
+          .map<Widget>((entry) {
+            return Text(
+              '${entry.key}: ${entry.value}',
+              style: TextStyle(fontSize: 16),
+            );
+          }).toList(),
+      ),
+    );
+  },
                 separatorBuilder: (BuildContext context, int index) {
                   return Divider();
                 },
+              ),
               ),
               SizedBox(height: 20),
               ElevatedButton.icon(

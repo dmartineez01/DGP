@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend_app/AdminPage/Config/configPage.dart';
+import 'package:frontend_app/AdminPage/Tareas/tareasPendientesAdmin.dart';
 import '../Widgets/menuController.dart';
 import '../network.dart';
 
@@ -35,6 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
       AdministradoresPage(),
       AlumnosPage(),
       TareasPage(),
+      TareasPendientesAdminPage(),
       ConfigPage()
     ]; // lista de páginas
 
