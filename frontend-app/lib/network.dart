@@ -140,6 +140,24 @@ Future<Tarea> addTarea(String nombre, String tipo) async {
   }
 }
 
+// Frontend: En tu aplicación Flutter
+
+Future<bool> deleteTarea(int id) async {
+  final response = await http.delete(
+    Uri.parse('http://10.0.2.2:3000/tareas/$id'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('Failed to delete task');
+  }
+}
+
+
 // Función para añadir un elemento de tarea
 Future<ElementoTarea> addElementoTarea(String pictograma, String descripcion, String sonido, String? video, int tareaId) async {
   final response = await http.post(
@@ -288,3 +306,117 @@ Future<bool> createComandaElemento(int comandaAsignadaId, int elementoTareaId, i
   }
 }
 
+//------------------------------
+
+Future<int?> obtenerCantidadElemento(int elementoId) async {
+  final url = Uri.parse('http://10.0.2.2:3000/material-elemento/$elementoId');
+  final response = await http.get(url);
+
+  print(elementoId);
+  print(response.body);
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    if (data['success'] == true) {
+      final cantidad = data['cantidad'] as int;
+      return cantidad;
+    } else {
+      // El elemento no se encontró
+      return null;
+    }
+  } else {
+    throw Exception('Failed to fetch element quantity');
+  }
+}
+
+Future<bool> updateTaskCompletionStatus(int alumnoId, int tareaId, String tipo, bool completada, int ultimoPaso) async {
+  final String endpoint;
+  switch (tipo) {
+    case "Material":
+      endpoint = 'http://10.0.2.2:3000/alumnos/$alumnoId/materiales-asignados/$tareaId/completar';
+      break;
+    case "Fija":
+      endpoint = 'http://10.0.2.2:3000/alumnos/$alumnoId/tareas-fijas/$tareaId/completar';
+      break;
+    case "Comanda":
+      endpoint = 'http://10.0.2.2:3000/alumnos/$alumnoId/tareas-comandas/$tareaId/completar';
+      break;
+    default:
+      throw Exception('Tipo de tarea desconocido');
+  }
+
+  final response = await http.patch(
+    Uri.parse(endpoint),
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({"completada": completada, "ultimoPaso": ultimoPaso}),
+  );
+
+  print(response.body);
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    print('Failed to update task completion status: ${response.body}');
+    return false;
+  }
+}
+
+Future<dynamic> fetchAssignedTask(int alumnoId, String tipo, int id) async {
+  final url = Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/tareas/$tipo/$id');
+  final response = await http.get(url);
+
+  print("Estado de la tarea" + response.body);
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else if (response.statusCode == 404) {
+    throw Exception('Tarea no encontrada');
+  } else {
+    throw Exception('Error al cargar la tarea');
+  }
+}
+
+//-----------------------------------
+
+Future<List<dynamic>> fetchCompletedTasks() async {
+  final response = await http.get(Uri.parse('http://10.0.2.2:3000/tareas-completadas'));
+  if (response.statusCode == 200) {
+    print(response.body);
+    return json.decode(response.body)['tareasCompletadas'];
+  } else {
+    throw Exception('Failed to load completed tasks');
+  }
+}
+
+Future<bool> confirmTask(int asignadaId, int tareaId, int alumnoId, String nombre, String tipo) async {
+  final response = await http.post(
+    Uri.parse('http://10.0.2.2:3000/confirmar-tarea'),
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      'asignadaId': asignadaId,
+      'tareaId': tareaId,
+      'alumnoId': alumnoId,
+      'nombre': nombre,
+      'tipo': tipo,
+    }),
+  );
+
+  return response.statusCode == 200;
+}
+
+Future<List<dynamic>> fetchFinalizedTasks() async {
+  final response = await http.get(Uri.parse('http://10.0.2.2:3000/tareas-finalizadas'));
+  if (response.statusCode == 200) {
+    return json.decode(response.body)['tareasFinalizadas'];
+  } else {
+    throw Exception('Failed to load finalized tasks');
+  }
+}
+
+Future<List<dynamic>> fetchHistorialAlumno(int alumnoId) async {
+  final response = await http.get(Uri.parse('http://10.0.2.2:3000/historial-alumno/$alumnoId'));
+  print(response.body);
+  if (response.statusCode == 200) {
+    return json.decode(response.body)['tareasFinalizadas'];
+  } else {
+    throw Exception('Failed to load student history');
+  }
+}

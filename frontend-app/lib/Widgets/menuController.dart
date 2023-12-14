@@ -39,9 +39,10 @@ class MenuScreen extends StatelessWidget {
                   children: <Widget>[
                     _buildMenuItem(Icons.list, 'Tareas Totales', 2), // Índice 4 para 'Tareas Totales'
                     _buildMenuItem(Icons.hourglass_empty, 'Tareas Pendientes', 3), // Índice 5 para 'Tareas Pendientes'
+                    _buildMenuItem(Icons.flag_sharp, 'Tareas Finalizadas', 4), // Índice 5 para 'Tareas Pendientes'
                   ],
                 ),
-                _buildMenuItem(Icons.settings, 'Configuración',4),
+                _buildMenuItem(Icons.settings, 'Configuración', 5),
               ],
             ),
           ),

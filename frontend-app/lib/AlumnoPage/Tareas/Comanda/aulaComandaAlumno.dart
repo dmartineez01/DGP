@@ -26,6 +26,121 @@ class AulaComandaAlumnoPage extends StatefulWidget {
 
 class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final PageController _pageController = PageController();
+  List<ElementoTarea> elementosTarea = [];
+  Map<int, TextEditingController> cantidadControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchElementosTarea();
+  }
+
+  void _fetchElementosTarea() async {
+    try {
+      elementosTarea = await fetchElementosTarea(widget.tarea['id']);
+      setState(() {
+        for (var elemento in elementosTarea) {
+          cantidadControllers[elemento.id] = TextEditingController(text: '1');
+        }
+      });
+    } catch (e) {
+      // Manejar excepción
+    }
+  }
+
+  Widget _buildElementoTareaCard(ElementoTarea elemento) {
+    return Card(
+      margin: EdgeInsets.all(16.0),
+      color: Colors.grey[100],
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Imagen
+             Semantics(
+          label: 'Pictograma de ${elemento.descripcion}', // Asegúrate de reemplazar 'nombre' con la propiedad correcta de ElementoTarea
+          child: Image.asset(
+            elemento.pictograma,
+            fit: BoxFit.contain,
+            width: double.infinity,
+            height: 150,
+            errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
+          ),
+        ),
+            SizedBox(height: 10),
+            // Descripción
+            Text(
+              "Descripcion: " + elemento.descripcion,
+              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            // Controles de Cantidad
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    int currentValue =
+                        int.tryParse(cantidadControllers[elemento.id]!.text) ??
+                            1;
+                    if (currentValue > 1) {
+                      cantidadControllers[elemento.id]!.text =
+                          (currentValue - 1).toString();
+                    }
+                  },
+                  child: CircleAvatar(
+                    radius:
+                        24, // Ajusta el radio para cambiar el tamaño del círculo
+                    backgroundColor: Colors.red, // Fondo rojo
+                    child: Icon(Icons.remove, size: 40, color: Colors.white),
+                  ),
+                ),
+                Container(
+                  width: 60,
+                  child: TextField(
+                    controller: cantidadControllers[elemento.id],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    int currentValue =
+                        int.tryParse(cantidadControllers[elemento.id]!.text) ??
+                            1;
+                    cantidadControllers[elemento.id]!.text =
+                        (currentValue + 1).toString();
+                  },
+                  child: CircleAvatar(
+                    radius:
+                        24, // Ajusta el radio para cambiar el tamaño del círculo
+                    backgroundColor: Colors.green, // Fondo rojo
+                    child: Icon(Icons.add, size: 40, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            // Botón Guardar
+            ElevatedButton(
+              onPressed: () {
+                // Lógica para guardar la tarea
+              },
+              child: Text('Guardar', style: TextStyle(fontSize: 18)),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue,
+                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,145 +161,59 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
             Expanded(
-              child: FutureBuilder<List<ElementoTarea>>(
-                future: fetchElementosTarea(widget.tarea['id']),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.hasData) {
-                      return ListView(
-                        children: snapshot.data!
-                            .map((ElementoTarea elemento) =>
-                                _buildElementoTareaCard(
-                                    elemento,
-                                    widget.aula['id'],
-                                    widget.comandaAsignadaId))
-                            .toList(),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text("Error: ${snapshot.error}");
-                    }
-                  }
-                  return Center(child: CircularProgressIndicator());
-                },
-              ),
+              child: elementosTarea.isNotEmpty
+                  ? PageView.builder(
+                      controller: _pageController,
+                      itemCount: elementosTarea.length,
+                      itemBuilder: (context, index) {
+                        return _buildElementoTareaCard(elementosTarea[index]);
+                      },
+                    )
+                  : Center(child: CircularProgressIndicator()),
             ),
-          ],
-        ),
-      ),
-    );
-  }
+            // Botones de Navegación
 
-  Widget _buildElementoTareaCard(
-      ElementoTarea elemento, int aulaId, int comandaAsignada_id) {
-    final TextEditingController controller = TextEditingController(text: '1');
-
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      color: Colors.grey[100],
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
-                elemento.pictograma,
-                fit: BoxFit.cover,
-                height: 80,
-                width: 80,
-                errorBuilder: (context, error, stackTrace) =>
-                    Icon(Icons.broken_image),
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text('${elemento.descripcion}',
-                      style: TextStyle(fontSize: 14.0)),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.play_arrow,
-                            color: Colors.blue, size: 20),
-                        onPressed: () async {
-                          String modifiedPath =
-                              elemento.sonido.replaceFirst('assets/', '');
-                          await _audioPlayer.play(AssetSource(modifiedPath),
-                              mode: PlayerMode.lowLatency);
-                        },
-                      ),
-                      Expanded(
-                        child: Text(
-                          elemento.sonido.split('/').last,
-                          style: TextStyle(
-                              fontSize: 12.0, fontStyle: FontStyle.italic),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary:
+                          Colors.grey, // Color rojo para el botón de retroceso
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12), // Tamaño del botón
+                    ),
+                    onPressed: () {
+                      if (_pageController.hasClients &&
+                          _pageController.page! > 0) {
+                        _pageController.previousPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      }
+                    },
+                    child: Icon(Icons.arrow_back, size: 30), // Icono más grande
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: controller,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Cantidad',
-                            labelStyle: TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.remove, size: 20),
-                        onPressed: () {
-                          int currentValue = int.tryParse(controller.text) ?? 1;
-                          if (currentValue > 1) {
-                            controller.text = (currentValue - 1).toString();
-                          }
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.add, size: 20),
-                        onPressed: () {
-                          int currentValue = int.tryParse(controller.text) ?? 1;
-                          controller.text = (currentValue + 1).toString();
-                        },
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            int cantidad = int.tryParse(controller.text) ?? 1;
-                            bool success = await createComandaElemento(
-                                comandaAsignada_id,
-                                elemento.id,
-                                cantidad,
-                                aulaId);
-                            if (success) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text('Guardado con éxito')));
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error al guardar')));
-                            }
-                          },
-                          child:
-                              Text('Guardar', style: TextStyle(fontSize: 12)),
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
-                          ),
-                        ),
-                      ),
-                    ],
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary:
+                          Colors.grey, // Color verde para el botón de avance
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                    onPressed: () {
+                      if (_pageController.hasClients &&
+                          _pageController.page! < (elementosTarea.length - 1)) {
+                        _pageController.nextPage(
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      }
+                    },
+                    child: Icon(Icons.arrow_forward, size: 30),
                   ),
                 ],
               ),

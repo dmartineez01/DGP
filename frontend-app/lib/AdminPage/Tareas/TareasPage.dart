@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
+import 'package:frontend_app/AdminPage/Tareas/InfoTarea.dart';
 import '../../Modelos/ElementoTarea.dart';
 import '../../Modelos/Tarea.dart';
 import '../../network.dart';
@@ -106,6 +107,24 @@ class _TareasPageState extends State<TareasPage> {
                           return ExpansionTile(
                             title: Text('ID: ${tarea.id} - ${tarea.nombre}'),
                             subtitle: Text(tarea.tipo),
+                            trailing: // Dentro de TareasPage, cuando abres InfoTarea:
+                                IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () async {
+                                final result = await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        InfoTarea(tarea: tarea),
+                                  ),
+                                );
+                                if (result == true) {
+                                  // Si se devuelve 'true', actualiza la lista de tareas
+                                  setState(() {
+                                    futureTareas = fetchTareas();
+                                  });
+                                }
+                              },
+                            ),
                             children: <Widget>[
                               FutureBuilder<List<ElementoTarea>>(
                                 future: fetchElementosTarea(tarea.id),

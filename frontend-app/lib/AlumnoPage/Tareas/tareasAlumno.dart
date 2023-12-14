@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend_app/AlumnoPage/Tareas/Comanda/tareaComandaAlumno.dart';
 import 'package:frontend_app/AlumnoPage/Tareas/Fija/tareaFijaAlumno.dart';
 import 'package:frontend_app/AlumnoPage/Tareas/Material/tareaMaterialAlumno.dart';
+import 'package:frontend_app/Modelos/ElementoTarea.dart';
+import 'package:frontend_app/Modelos/Tarea.dart';
 import 'package:frontend_app/Widgets/menuController.dart';
 import 'package:frontend_app/network.dart';
 
@@ -17,6 +19,8 @@ class TareasAlumnoPage extends StatefulWidget {
 
 class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
   List<dynamic> tareasAsignadas = [];
+  Map<int, List<ElementoTarea>> elementosTareas =
+      {}; // Nuevo mapa para almacenar los elementos de cada tarea
   PageController _pageController = PageController();
 
   @override
@@ -34,13 +38,26 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
   void _fetchAssignedTasks() async {
     try {
       final response = await fetchAllAssignedTasksForStudent(widget.alumnoId);
-
       setState(() {
         tareasAsignadas = response;
         print(response);
       });
+      _fetchElementosTareas();
     } catch (error) {
       print('Error al obtener tareas asignadas: $error');
+    }
+  }
+
+  void _fetchElementosTareas() async {
+    try {
+      for (var tarea in tareasAsignadas) {
+        final elementos = await fetchElementosTarea(tarea['id']);
+        setState(() {
+          elementosTareas[tarea['id']] = elementos;
+        });
+      }
+    } catch (error) {
+      print('Error al obtener elementos de la tarea: $error');
     }
   }
 
@@ -81,23 +98,37 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
           botonSalir(),
           Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Mis Tareas',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              children: <Widget>[
+                // Imagen del pictograma
+                Semantics(
+                  label:
+                      'Imagen representativa de mis tareas', // Descripción específica de la tarea
+                  child: Image.asset('assets/pictogramas/mis_tareas.png',
+                      width: 100, height: 100),
+                ),
+
+                SizedBox(width: 10), // Espacio entre la imagen y el texto
+                // Texto del título
+                Text(
+                  'Mis Tareas',
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           Divider(),
           Expanded(
             child: PageView.builder(
               controller: _pageController,
-              itemCount: (tareasAsignadas.length / 3)
+              itemCount: (tareasAsignadas.length / 2)
                   .ceil(), // Calcula el número de páginas
               itemBuilder: (BuildContext context, int pageIndex) {
-                int startIndex = pageIndex * 3;
-                int endIndex = startIndex + 3;
+                int startIndex = pageIndex * 2;
+                int endIndex = startIndex + 2;
                 endIndex = endIndex > tareasAsignadas.length
                     ? tareasAsignadas.length
                     : endIndex;
@@ -108,7 +139,14 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
                       .map((tarea) {
                     Color color = _getTareaColor(tarea['tipo']);
                     IconData icono = _getTareaIcon(tarea['id']);
-                    String imagen = _getTareaImage(tarea['tipo']);
+                    print(elementosTareas);
+                    String imagen;
+                    if (elementosTareas[tarea['id']] != null &&
+                        elementosTareas[tarea['id']]!.isNotEmpty) {
+                      imagen = elementosTareas[tarea['id']]!.first.pictograma;
+                    } else {
+                      imagen = _getTareaImage(tarea['tipo']);
+                    }
 
                     return Card(
                       color: color.withOpacity(0.3),
@@ -130,22 +168,31 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
                               builder: (context) => TareaComandaAlumnoPage(
                                 tarea: tarea,
                                 comandaAsignadaId: comandaAsignadaId,
+                                alumnoId: widget.alumnoId,
                               ),
                             ));
                           } else if (tipoTarea == 'Material') {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => TareaMaterialAlumnoPage(
-                                tarea: tarea,
-                                materialAsignadaId: materialAsignadaId,
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TareaMaterialAlumnoPage(
+                                  tarea: Tarea.fromMap(tarea as Map<String,
+                                      dynamic>), // Conversión aquí
+                                  materialAsignadaId: materialAsignadaId,
+                                  alumnoId: widget.alumnoId,
+                                ),
                               ),
-                            ));
+                            );
                           } else if (tipoTarea == 'Fija') {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => TareaFijaAlumnoPage(
-                                tarea: tarea,
-                                fijaAsignadaId: fijaAsignadaId,
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => TareaFijaAlumnoPage(
+                                  tarea: Tarea.fromMap(tarea as Map<String,
+                                      dynamic>), // Conversión aquí
+                                  fijaAsignadaId: fijaAsignadaId,
+                                  alumnoId: widget.alumnoId,
+                                ),
                               ),
-                            ));
+                            );
                           }
                         },
                         child: Padding(
@@ -163,7 +210,12 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
                                       fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Image.asset(imagen, width: 100, height: 100),
+                              Semantics(
+                                label:
+                                    'Imagen representativa de la tarea ${tarea['nombre']}', // Descripción específica de la tarea
+                                child: Image.asset(imagen,
+                                    width: 100, height: 100),
+                              ),
                             ],
                           ),
                         ),

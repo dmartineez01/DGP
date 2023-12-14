@@ -6,10 +6,14 @@ import 'package:frontend_app/network.dart';
 class TareaComandaAlumnoPage extends StatefulWidget {
   final dynamic tarea;
   final int comandaAsignadaId;
+  final int alumnoId;
 
-  TareaComandaAlumnoPage(
-      {Key? key, required this.tarea, required this.comandaAsignadaId})
-      : super(key: key);
+  TareaComandaAlumnoPage({
+    Key? key,
+    required this.tarea,
+    required this.comandaAsignadaId,
+    required this.alumnoId,
+  }) : super(key: key);
 
   @override
   _TareaComandaAlumnoPageState createState() => _TareaComandaAlumnoPageState();
@@ -17,11 +21,29 @@ class TareaComandaAlumnoPage extends StatefulWidget {
 
 class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
   List<dynamic> aulas = [];
+  bool isTaskCompleted =
+      false; // Añade esta variable para el estado de completitud
 
   @override
   void initState() {
     super.initState();
     _fetchAulas();
+    _checkTaskCompletion(); // Llama a la función para verificar el estado de completitud
+  }
+
+  void _checkTaskCompletion() async {
+    try {
+      final taskData = await fetchAssignedTask(
+          widget.alumnoId, widget.tarea['tipo'], widget.comandaAsignadaId);
+      if (taskData != null && taskData['completada'] != null) {
+        setState(() {
+          isTaskCompleted = taskData['completada'] ==
+              1; // Asume que 'completada' es un entero
+        });
+      }
+    } catch (e) {
+      print('Error al obtener el estado de la tarea: $e');
+    }
   }
 
   void _fetchAulas() async {
@@ -35,6 +57,35 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
     }
   }
 
+  Widget _buildCompleteButton() {
+    final String buttonText =
+        isTaskCompleted ? 'Marcar como Pendiente' : 'Completar Tarea';
+    final Color buttonColor = isTaskCompleted ? Colors.red : Colors.green;
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ElevatedButton(
+        onPressed: () async {
+          final bool success = await updateTaskCompletionStatus(widget.alumnoId,
+              widget.comandaAsignadaId, "Comanda", !isTaskCompleted, 0);
+
+          if (success) {
+            setState(() {
+              isTaskCompleted = !isTaskCompleted;
+            });
+          } else {
+            // Manejar el fallo de alguna manera
+          }
+        },
+        child: Text(buttonText, style: TextStyle(fontSize: 18)),
+        style: ElevatedButton.styleFrom(
+          primary: buttonColor,
+          padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,13 +93,24 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
         children: [
           botonSalir(),
           Text(
+            "Tarea: " + widget.tarea["nombre"],
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
             'Aulas',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          Image.asset(
-            'assets/pictogramas/aula.png', // Asegúrate de tener esta imagen en tus assets
-            width: 400,
-            height: 150,
+          Semantics(
+            label:
+                'Imagen representativa de un aula', // Descripción adecuada de la imagen
+            child: Image.asset(
+              'assets/pictogramas/aula.png', // Asegúrate de tener esta imagen en tus assets
+              width: 400,
+              height: 150,
+            ),
           ),
           Expanded(
             child: ListView.builder(
@@ -86,6 +148,7 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
               },
             ),
           ),
+          _buildCompleteButton()
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
-
 class ImageSelectionScreen extends StatefulWidget {
   @override
   _ImageSelectionScreenState createState() => _ImageSelectionScreenState();
@@ -21,7 +20,10 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
   Future<void> _loadImagesFromAssets() async {
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-    final imagePaths = manifestMap.keys.where((String key) => key.startsWith('assets/pictogramas/')).where((String path) => _isImageFile(path)).toList();
+    final imagePaths = manifestMap.keys
+        .where((String key) => key.startsWith('assets/pictogramas/'))
+        .where((String path) => _isImageFile(path))
+        .toList();
     setState(() {
       this.imagePaths = imagePaths;
     });
@@ -38,12 +40,22 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
       appBar: AppBar(
         title: Text('Seleccionar Imagen'),
       ),
-      body: ListView.builder(
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // Número de imágenes por línea
+          crossAxisSpacing: 4.0, // Espaciado horizontal entre imágenes
+          mainAxisSpacing: 4.0, // Espaciado vertical entre imágenes
+        ),
         itemCount: imagePaths.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Image.asset(imagePaths[index]),
+          return InkWell(
             onTap: () => Navigator.of(context).pop(imagePaths[index]),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 2), // Borde para distinguir las imágenes
+              ),
+              child: Image.asset(imagePaths[index], fit: BoxFit.cover),
+            ),
           );
         },
       ),

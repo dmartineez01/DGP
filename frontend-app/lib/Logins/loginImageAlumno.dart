@@ -25,40 +25,56 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
   ];
 
   void _selectImage(int index) {
-  int adjustedIndex = index + 1; // Ajusta el índice para que comience en 1
-  List<int> newSequence = [...selectedImageIndices, adjustedIndex];
+    int adjustedIndex = index + 1; // Ajusta el índice para que comience en 1
+    List<int> newSequence = [...selectedImageIndices, adjustedIndex];
 
-  // Construye la secuencia como un string para la comparación
-  String nextSequence = newSequence.map((idx) => idx.toString()).join('');
+    // Construye la secuencia como un string para la comparación
+    String nextSequence = newSequence.map((idx) => idx.toString()).join('');
 
-  // Solo procede si la secuencia es correcta hasta este punto
-  if (widget.alumno['password'].startsWith(nextSequence)) {
-    setState(() {
-      selectedImageIndices = newSequence; // Actualiza con la nueva secuencia
-    });
+    // Solo procede si la secuencia es correcta hasta este punto
+    if (widget.alumno['password'].startsWith(nextSequence)) {
+      setState(() {
+        selectedImageIndices = newSequence; // Actualiza con la nueva secuencia
+      });
 
-    // Verifica si la secuencia completa es correcta
-    if (nextSequence == widget.alumno['password']) {
-      _navigateToInicioPage();
+      // Verifica si la secuencia completa es correcta
+      if (nextSequence == widget.alumno['password']) {
+        _navigateToInicioPage();
+      }
+    } else {
+      // Si la secuencia no es correcta, muestra el SnackBar personalizado y comienza de nuevo
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Icon(Icons.cancel,
+                  color: Colors.white,
+                  size: 80), // Ícono de cruceta blanca grande
+              Expanded(
+                child: Text('Incorrecto',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 24, color: Colors.white)),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red, // Fondo rojo del SnackBar
+          duration: Duration(seconds: 3),
+        ),
+      );
+      setState(() {
+        selectedImageIndices
+            .clear(); // Limpia la secuencia para empezar de nuevo
+      });
     }
-  } else {
-    // Si la secuencia no es correcta, muestra error y comienza de nuevo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Secuencia de imágenes incorrecta')),
-    );
-    setState(() {
-      selectedImageIndices.clear(); // Limpia la secuencia para empezar de nuevo
-    });
   }
-}
 
-void _navigateToInicioPage() {
-  Navigator.of(context).push(MaterialPageRoute(
-    builder: (context) =>
-        AlumnoInicioPage(alumno: widget.alumno, image: widget.image),
-  ));
-}
-
+  void _navigateToInicioPage() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) =>
+          AlumnoInicioPage(alumno: widget.alumno, image: widget.image),
+    ));
+  }
 
   void _checkImageSequence() {
     // Convierte la secuencia de índices en la secuencia de números como string
@@ -93,7 +109,7 @@ void _navigateToInicioPage() {
               Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Image.asset(
-                  'assets/images/${imageOptions[index-1]}',
+                  'assets/images/${imageOptions[index - 1]}',
                   width: 80,
                   height: 80,
                 ),
@@ -135,37 +151,44 @@ void _navigateToInicioPage() {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () => _selectImage(index),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: selectedImageIndices.contains(index+1)
-                                ? Colors.green
-                                : Colors.grey,
-                            width: selectedImageIndices.contains(index+1) ? 5 : 1,
-                          ),
-                          image: DecorationImage(
-                            image: AssetImage(
-                                'assets/images/${imageOptions[index]}'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 5,
-                        right: 5,
-                        child: CircleAvatar(
-                          radius: 12,
-                          backgroundColor: Colors.blue,
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
+                  child: Semantics(
+                    label:
+                        'Imagen de contraseña ${index + 1}', // Descripción alternativa para accesibilidad
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: selectedImageIndices.contains(index + 1)
+                                  ? Colors.green
+                                  : Colors.grey,
+                              width: selectedImageIndices.contains(index + 1)
+                                  ? 5
+                                  : 1,
+                            ),
+                            image: DecorationImage(
+                              image: AssetImage(
+                                  'assets/images/${imageOptions[index]}'),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 5,
+                          right: 5,
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.blue,
+                            child: Text(
+                              '${index + 1}',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -20,6 +20,29 @@ class _LoginPageState extends State<LoginPage> {
 
   late Future<List<dynamic>> futureAlumnos;
 
+  int currentPage = 0;
+  final int pageSize = 4;
+
+  void nextPage() {
+    setState(() {
+      currentPage++;
+    });
+  }
+
+  void previousPage() {
+    if (currentPage > 0) {
+      setState(() {
+        currentPage--;
+      });
+    }
+  }
+
+  List<dynamic> getAlumnosForCurrentPage(List<dynamic> alumnos) {
+    int start = currentPage * pageSize;
+    int end = min(alumnos.length, start + pageSize);
+    return alumnos.sublist(start, end);
+  }
+
   List<String> imagenPerfil = [
     "heroe1.jpg",
     "heroe2.jpg",
@@ -34,7 +57,6 @@ class _LoginPageState extends State<LoginPage> {
       Colors.red,
       Colors.green,
       Colors.blue,
-      Colors.yellow,
       Colors.orange,
       Colors.purple
     ];
@@ -87,14 +109,46 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-   Widget _buildStudentLogin() {
+  Widget _buildStudentLogin() {
     return FutureBuilder<List<dynamic>>(
       future: futureAlumnos,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {
+            List<dynamic> alumnosPage =
+                getAlumnosForCurrentPage(snapshot.data!);
             return Column(
-              children: snapshot.data!.map((alumno) => _buildAlumnoTile(alumno)).toList(),
+              children: [
+                ...alumnosPage
+                    .map((alumno) => _buildAlumnoTile(alumno))
+                    .toList(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors
+                            .grey, // Color rojo para el botón de retroceso
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12), // Tamaño del botón
+                      ),
+                      onPressed: previousPage,
+                      child:
+                          Icon(Icons.arrow_back, size: 30), // Icono más grande
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary:
+                            Colors.grey, // Color verde para el botón de avance
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      onPressed: nextPage,
+                      child: Icon(Icons.arrow_forward, size: 30),
+                    ),
+                  ],
+                ),
+              ],
             );
           } else if (snapshot.hasError) {
             return Text("Error: ${snapshot.error}");
@@ -105,31 +159,47 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildAlumnoTile(dynamic alumno) {
-    return Card(
-      color: _getColorForAlumno(alumno['id']),
-      elevation: 4,
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        leading: ClipOval(
-          child: Container(
-            width: 120,
-            height: 70,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                image: AssetImage("assets/images/${_getImageForAlumno(alumno['id'])}"),
-                fit: BoxFit.contain,
-              ),
+ Widget _buildAlumnoTile(dynamic alumno) {
+  // Verifica si el alumno tiene una imagen de perfil definida
+  final tieneImagenPerfil = alumno['imagen_perfil'] != null && alumno['imagen_perfil'].isNotEmpty;
+
+  return Card(
+    color: _getColorForAlumno(alumno['id']),
+    elevation: 4,
+    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+    child: ListTile(
+      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      leading: ClipOval(
+        child: Container(
+          width: 120,
+          height: 70,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              // Usa NetworkImage si hay una URL disponible, de lo contrario usa AssetImage
+              image: tieneImagenPerfil 
+                  ? AssetImage(alumno['imagen_perfil'])
+                  : AssetImage("assets/images/${_getImageForAlumno(alumno['id'])}"),
+              fit: BoxFit.contain,
             ),
           ),
+          child: Image(
+            image: tieneImagenPerfil 
+                  ? AssetImage(alumno['imagen_perfil'])
+                  : AssetImage("assets/images/${_getImageForAlumno(alumno['id'])}"),
+            semanticLabel: 'Imagen de perfil de ${alumno['nombre']}', // Descripción alternativa para accesibilidad
+          ),
         ),
-        title: Text(alumno['nombre'], style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20)),
-        onTap: () => _loginAlumno(alumno),
       ),
-    );
-  }
+      title: Text(
+        alumno['nombre'],
+        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20)
+      ),
+      onTap: () => _loginAlumno(alumno),
+    ),
+  );
+}
+
 
 
   @override

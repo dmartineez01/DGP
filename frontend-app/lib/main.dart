@@ -4,7 +4,11 @@ import 'AdminPage/inicio.dart';
 import 'login.dart';
 import 'AdminPage/Alumnos/agregarEstudiante.dart';
 
+//adminUser
+//securePassword
 
+//juanprez 3241
+//anagmez con texto
 void main() {
   runApp(MyApp());
 }
@@ -13,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Aplicacion PTVAL',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

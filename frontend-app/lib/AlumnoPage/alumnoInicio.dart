@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_app/AlumnoPage/Historial/historialAlumno.dart';
 import 'package:frontend_app/AlumnoPage/Tareas/tareasAlumno.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -37,7 +38,7 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
           Expanded(
             child: ListView(
               children: [
-                _buildAccessibleCard('HISTORIAL', 'assets/pictogramas/historial.jpg'),
+                _buildAccessibleCard('HISTORIAL', 'assets/pictogramas/historial.png'),
                 _buildAccessibleCard('TAREAS', 'assets/pictogramas/tareas.jpg'),
               ],
             ),
@@ -61,29 +62,45 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
   }
 
   Widget _buildDayIndicator() {
-  // Configura el local para español
-  String dayLetter = DateFormat('EEEE', 'es_ES').format(DateTime.now())[0].toUpperCase();
-  List<String> days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  String todayFull = DateFormat('EEEE', 'es_ES').format(DateTime.now()).toLowerCase();
+  List<Map<String, dynamic>> days = [
+    {'name': 'lunes', 'icon': Icons.wb_sunny, 'color': Colors.yellow},
+    {'name': 'martes', 'icon': Icons.cloud, 'color': Colors.blue},
+    {'name': 'miércoles', 'icon': Icons.grass, 'color': Colors.green},
+    {'name': 'jueves', 'icon': Icons.water, 'color': Colors.teal},
+    {'name': 'viernes', 'icon': Icons.sports_soccer, 'color': Colors.orange},
+    {'name': 'sábado', 'icon': Icons.music_note, 'color': Colors.purple},
+    {'name': 'domingo', 'icon': Icons.cake, 'color': Colors.pink},
+  ];
 
   return Padding(
     padding: EdgeInsets.symmetric(vertical: 8.0),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: days.map((String letter) {
-        bool isToday = dayLetter == letter;
-        return Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isToday ? Colors.green : Colors.transparent,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Text(
-            letter,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-              color: isToday ? Colors.white : Colors.grey,
+      children: days.map((day) {
+        bool isToday = todayFull == day['name'];
+        return Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isToday ? day['color'] : Colors.transparent,
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Row(
+              children: <Widget>[
+                Icon(day['icon'], color: isToday ? Colors.white : day['color'], size: 20),
+                SizedBox(width: 2),
+                Text(
+                  isToday ? day['name'].replaceFirst(day['name'][0], day['name'][0].toUpperCase()) : "",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -91,6 +108,8 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
     ),
   );
 }
+
+
 
 
   Widget _buildAccessibleCard(String title, String imageAsset) {
@@ -103,8 +122,14 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
             builder: (context) => TareasAlumnoPage(alumnoId: widget.alumno['id']), // Pasamos el ID del alumno aquí
           ),
         );
-      } else {
-        // Lógica para ir al histórico o cualquier otra tarjeta
+      } else if (title == 'HISTORIAL') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HistorialAlumnoPage(alumnoId: widget.alumno['id']), // Pasamos el ID del alumno aquí
+          ),
+        );
+      
       }
     },
       child: Card(
@@ -112,11 +137,14 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
         margin: EdgeInsets.symmetric(vertical: 10),
         child: Column(
           children: [
-            Image.asset(
+            Semantics(
+            label: 'Imagen representativa de $title', // Descripción alternativa para accesibilidad
+            child: Image.asset(
               imageAsset,
-              height: 150, // 80% de la altura asignada para la imagen
+              height: 150, // Altura asignada para la imagen
               fit: BoxFit.fitWidth,
             ),
+          ),
             Container(
               padding: EdgeInsets.all(8),
               width: double.infinity,
