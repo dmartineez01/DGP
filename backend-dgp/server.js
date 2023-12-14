@@ -191,6 +191,23 @@ app.post('/tareas', (req, res) => {
     });
 });
 
+// Backend: En tu servidor Express (Node.js)
+
+app.delete('/tareas/:id', (req, res) => {
+    const { id } = req.params;
+
+    console.log('Eliminando tarea con ID:', id);
+    db.query('DELETE FROM tareas WHERE id = ?', [id], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error });
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ message: 'No se encontró la tarea' });
+        }
+        res.json({ success: true, message: 'Tarea eliminada' });
+    });
+});
+
 app.post('/tareas/:id/elementos', (req, res) => {
     const tareaId = req.params.id;
     const { pictograma, descripcion, sonido, video } = req.body;
@@ -230,8 +247,6 @@ app.post('/alumnos/:alumnoId/asignar-material', (req, res) => {
     });
 });
 
-
-
 // Ruta para obtener Materiales Asignados a un Alumno
 app.get('/alumnos/:alumnoId/materiales-asignados', (req, res) => {
     const alumno_id = req.params.alumnoId;
@@ -257,6 +272,17 @@ app.post('/material-elemento', (req, res) => {
     });
 });
 
+app.patch('/alumnos/:alumnoId/materiales-asignados/:tareaId/completar', (req, res) => {
+    const { alumnoId, tareaId } = req.params;
+    const { completada, ultimoPaso } = req.body; // Este valor debe ser TRUE o FALSE
+
+    db.query('UPDATE MaterialAsignada SET completada = ?, ultimo_paso = ? WHERE alumno_id = ? AND id = ?', [completada, ultimoPaso, alumnoId, tareaId], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error });
+        }
+        res.json({ success: true, message: 'Estado de la tarea material actualizado correctamente' });
+    });
+});
 
 // Ruta para asignar una Tarea Fija a un Alumno
 app.post('/alumnos/:alumnoId/asignar-tarea-fija', (req, res) => {
@@ -288,6 +314,19 @@ app.get('/alumnos/:alumnoId/tareas-fijas-asignadas', (req, res) => {
     });
 });
 
+// Ruta para actualizar el estado de completada de una Tarea Fija
+app.patch('/alumnos/:alumnoId/tareas-fijas/:tareaId/completar', (req, res) => {
+    const { alumnoId, tareaId } = req.params;
+    const { completada, ultimoPaso } = req.body; // Este valor debe ser TRUE o FALSE
+
+    db.query('UPDATE FijaAsignada SET completada = ?, ultimo_paso = ? WHERE alumno_id = ? AND id = ?', [completada, ultimoPaso, alumnoId, tareaId], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error });
+        }
+        res.json({ success: true, message: 'Estado de la tarea fija actualizado correctamente' });
+    });
+});
+
 
 // Ruta para asignar una Tarea Comanda a un Alumno
 app.post('/alumnos/:alumnoId/asignar-tarea-comanda', (req, res) => {
@@ -315,6 +354,20 @@ app.get('/alumnos/:alumnoId/tareas-comandas-asignadas', (req, res) => {
         res.json({ success: true, tareasComandasAsignadas: results });
     });
 });
+
+// Ruta para actualizar el estado de completada de una Tarea Comanda
+app.patch('/alumnos/:alumnoId/tareas-comandas/:tareaId/completar', (req, res) => {
+    const { alumnoId, tareaId } = req.params;
+    const { completada, ultimoPaso } = req.body; // Este valor debe ser TRUE o FALSE
+
+    db.query('UPDATE ComandaAsignada SET completada = ?, ultimo_paso = ? WHERE alumno_id = ? AND id = ?', [completada, ultimoPaso, alumnoId, tareaId], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error });
+        }
+        res.json({ success: true, message: 'Estado de la tarea comanda actualizado correctamente' });
+    });
+});
+
 
 //------------------------------------------
 
@@ -353,7 +406,167 @@ app.post('/comanda-elemento', (req, res) => {
     });
 });
 
+//---------------------------
 
+// Backend: En tu servidor Express (Node.js)
+
+// Endpoint para obtener la cantidad de un elemento en MaterialElemento
+app.get('/material-elemento/:id', (req, res) => {
+    const elementoId = req.params.id;
+
+    db.query('SELECT cantidad FROM MaterialElemento WHERE elementoTarea_id = ?', [elementoId], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'No se encontró el elemento' });
+        }
+        const cantidad = results[0].cantidad;
+        res.json({ success: true, cantidad });
+    });
+});
+
+app.get('/alumnos/:alumnoId/tareas/:tipo/:id', (req, res) => {
+    const { alumnoId, tipo, id } = req.params;
+
+    let tableName;
+    if (tipo === "Fija") {
+        tableName = "FijaAsignada";
+    } else if (tipo === "Comanda") {
+        tableName = "ComandaAsignada";
+    } else if (tipo === "Material") {
+        tableName = "MaterialAsignada";
+    } else {
+        return res.status(400).json({ error: "Tipo de tarea no válido" });
+    }
+
+    const query = `SELECT * FROM ${tableName} WHERE alumno_id = ? AND id = ?`;
+    db.query(query, [alumnoId, id], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error });
+        }
+        if (results.length > 0) {
+            res.json(results[0]);
+        } else {
+            res.status(404).json({ message: 'Tarea no encontrada' });
+        }
+    });
+});
+
+//--------------------------------------------
+
+// Endpoint para obtener tareas completadas
+app.get('/tareas-completadas', (req, res) => {
+    const query = `
+      SELECT FA.id AS asignadaId, FA.tarea_id AS tareaId, FA.alumno_id, A.nombre AS nombre_alumno, T.nombre AS nombre_tarea, T.tipo, FA.ultimo_paso
+      FROM FijaAsignada FA
+      INNER JOIN tareas T ON FA.tarea_id = T.id
+      INNER JOIN alumnos A ON FA.alumno_id = A.id
+      WHERE FA.completada = 1
+      UNION
+      SELECT CA.id AS asignadaId, CA.tarea_id AS tareaId, CA.alumno_id, A.nombre AS nombre_alumno, T.nombre AS nombre_tarea, T.tipo, CA.ultimo_paso
+      FROM ComandaAsignada CA
+      INNER JOIN tareas T ON CA.tarea_id = T.id
+      INNER JOIN alumnos A ON CA.alumno_id = A.id
+      WHERE CA.completada = 1
+      UNION
+      SELECT MA.id AS asignadaId, MA.tarea_id AS tareaId, MA.alumno_id, A.nombre AS nombre_alumno, T.nombre AS nombre_tarea, T.tipo, MA.ultimo_paso
+      FROM MaterialAsignada MA
+      INNER JOIN tareas T ON MA.tarea_id = T.id
+      INNER JOIN alumnos A ON MA.alumno_id = A.id
+      WHERE MA.completada = 1
+    `;
+    db.query(query, (error, results) => {
+      if (error) {
+        return res.status(500).json({ error });
+      }
+      res.json({ tareasCompletadas: results });
+    });
+});
+
+
+  
+  
+  app.post('/confirmar-tarea', (req, res) => {
+    const { asignadaId, tareaId, alumnoId, nombre, tipo } = req.body;
+  
+    db.beginTransaction((err) => {
+      if (err) { throw err; }
+  
+      // Inserta en TareasFinalizadas
+      const insertFinalizada = 'INSERT INTO TareasFinalizadas (alumno_id, nombre, tipo) VALUES (?, ?, ?)';
+      db.query(insertFinalizada, [alumnoId, nombre, tipo], (error, results) => {
+        if (error) {
+          return db.rollback(() => {
+            throw error;
+          });
+        }
+  
+        // Elimina de la tabla de tarea asignada
+        const deleteTareaAsignada = `DELETE FROM ${tipo}Asignada WHERE id = ?`;
+        db.query(deleteTareaAsignada, [asignadaId], (error, results) => {
+          if (error) {
+            return db.rollback(() => {
+              throw error;
+            });
+          }
+  
+          // Elimina de la tabla tareas
+          const deleteTarea = `DELETE FROM tareas WHERE id = ?`;
+          db.query(deleteTarea, [tareaId], (error, results) => {
+            if (error) {
+              return db.rollback(() => {
+                throw error;
+              });
+            }
+  
+            db.commit((err) => {
+              if (err) {
+                return db.rollback(() => {
+                  throw err;
+                });
+              }
+              res.json({ success: true, message: 'Tarea confirmada y movida a finalizadas' });
+            });
+          });
+        });
+      });
+    });
+  });
+
+  app.get('/tareas-finalizadas', (req, res) => {
+    const query = `
+    SELECT TF.*, A.nombre AS nombre_alumno, TF.fecha_finalizacion
+    FROM TareasFinalizadas TF
+    INNER JOIN alumnos A ON TF.alumno_id = A.id
+    ORDER BY A.nombre, TF.fecha_finalizacion
+  `;
+    db.query(query, (error, results) => {
+      if (error) {
+        return res.status(500).json({ error });
+      }
+      res.json({ tareasFinalizadas: results });
+    });
+  });
+  
+  app.get('/historial-alumno/:alumnoId', (req, res) => {
+    const { alumnoId } = req.params;
+    const query = `
+      SELECT TF.*, A.nombre AS nombre_alumno, TF.fecha_finalizacion, TF.tipo
+      FROM TareasFinalizadas TF
+      INNER JOIN alumnos A ON TF.alumno_id = A.id
+      WHERE TF.alumno_id = ?
+      ORDER BY TF.fecha_finalizacion DESC
+    `;
+    db.query(query, [alumnoId], (error, results) => {
+      if (error) {
+        return res.status(500).json({ error });
+      }
+      res.json({ tareasFinalizadas: results });
+    });
+  });
+  
+  
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
