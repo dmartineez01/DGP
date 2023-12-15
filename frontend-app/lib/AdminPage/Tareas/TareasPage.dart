@@ -1,3 +1,4 @@
+// Importación de bibliotecas necesarias.
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
@@ -7,6 +8,7 @@ import '../../Modelos/Tarea.dart';
 import '../../network.dart';
 import 'agregarTarea.dart';
 
+// Clase que representa la página de tareas.
 class TareasPage extends StatefulWidget {
   @override
   _TareasPageState createState() => _TareasPageState();
@@ -24,6 +26,7 @@ class _TareasPageState extends State<TareasPage> {
     futureTareas = fetchTareas();
   }
 
+  // Filtra las tareas según la consulta de búsqueda.
   void _filterTareas(String query) {
     if (query.isNotEmpty) {
       futureTareas.then((tareas) {
@@ -41,6 +44,7 @@ class _TareasPageState extends State<TareasPage> {
     }
   }
 
+  // Obtiene y establece la lista de elementos de una tarea.
   Future<List<ElementoTarea>> _fetchAndSetElementos(int tareaId) async {
     return await fetchElementosTarea(tareaId);
   }

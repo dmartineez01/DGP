@@ -1,8 +1,10 @@
+// Importación de bibliotecas necesarias.
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 
+// Clase que representa la pantalla de selección de imágenes.
 class ImageSelectionScreen extends StatefulWidget {
   @override
   _ImageSelectionScreenState createState() => _ImageSelectionScreenState();
@@ -17,6 +19,7 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
     _loadImagesFromAssets();
   }
 
+  // Carga las imágenes desde los activos.
   Future<void> _loadImagesFromAssets() async {
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
@@ -29,6 +32,7 @@ class _ImageSelectionScreenState extends State<ImageSelectionScreen> {
     });
   }
 
+  // Comprueba si un archivo es una imagen basándose en su extensión.
   bool _isImageFile(String path) {
     final ext = extension(path).toLowerCase();
     return ext == '.jpg' || ext == '.jpeg' || ext == '.png' || ext == '.gif';

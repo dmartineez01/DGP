@@ -24,6 +24,7 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
     _fetchHistorial();
   }
 
+  // Función para obtener el historial del alumno
   void _fetchHistorial() async {
     try {
       final fetchedHistorial = await fetchHistorialAlumno(widget.alumnoId);
@@ -36,6 +37,7 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
     }
   }
 
+  // Función para organizar las tareas por semana
   void _organizarTareasPorSemana(List<dynamic> tareas) {
     tareasPorSemana.clear();
     for (var tarea in tareas) {
@@ -47,16 +49,17 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
     }
   }
 
+  // Función para obtener el número de la semana
   int _numeroSemana(DateTime fecha) {
     int diaAno = int.parse(DateFormat("D").format(fecha));
     int numeroSemana = ((diaAno - fecha.weekday + 10) / 7).floor();
     return numeroSemana;
   }
 
+  // Función para obtener el rango de la semana actual
   String _rangoSemana(int semana) {
     DateTime ahora = DateTime.now();
     int diferenciaSemana = semana - _numeroSemana(ahora);
-    // Cambiar de subtract a add para avanzar semanas
     DateTime lunes =
         ahora.add(Duration(days: -ahora.weekday + 1 + diferenciaSemana * 7));
     DateTime domingo = lunes.add(Duration(days: 6));
@@ -65,6 +68,7 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
     return "Tareas Completadas: [$inicio - $fin]";
   }
 
+  // Widget para construir las tareas de la semana
   Widget _buildTareasSemana(List<dynamic> tareasSemana) {
     int numPages = (tareasSemana.length / 2).ceil();
     return Column(
@@ -91,16 +95,13 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
                   return Container(
                     color: colorTarea.withOpacity(0.2),
                     height: 100,
-
-                    margin:
-                        EdgeInsets.all(8.0), // Margen para separar las tareas
+                    margin: EdgeInsets.all(8.0),
                     child: ListTile(
                       title: Text(
                         tarea['nombre'] ?? 'Sin nombre',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize:
-                              18, // Tamaño de fuente más grande para el título
+                          fontSize: 18,
                         ),
                       ),
                       subtitle: Column(
@@ -111,25 +112,22 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
                             style: TextStyle(
                               color: colorTarea,
                               fontWeight: FontWeight.bold,
-                              fontSize:
-                                  15, // Tamaño de fuente más grande para el subtítulo
+                              fontSize: 15,
                             ),
                           ),
                           Text(
                             'Fecha: $horaFormateada',
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize:
-                                  18, // Tamaño de fuente más grande para la hora
+                              fontSize: 18,
                             ),
                           ),
                         ],
                       ),
                       leading: Image.asset(
                         imagenTarea,
-                        width: 100, // Tamaño más grande para la imagen
-                        height:
-                            100, // Ajusta la altura para mantener la proporción
+                        width: 100,
+                        height: 100,
                       ),
                     ),
                   );
@@ -139,73 +137,62 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
           ),
         ),
         Row(
-  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  children: [
-    ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Colors.green, // Color de fondo
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Borde redondeado
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                if (_pageController.hasClients && _pageController.page! > 0) {
+                  _pageController.previousPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.arrow_back, color: Colors.white),
+                  Text(" Tareas Anteriores", style: TextStyle(color: Colors.white)),
+                ],
+              ),
+              style: ElevatedButton.styleFrom(primary: Colors.green),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_pageController.hasClients &&
+                    _pageController.page! < numPages - 1) {
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                }
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Tareas Siguientes ", style: TextStyle(color: Colors.white)),
+                  Icon(Icons.arrow_forward, color: Colors.white),
+                ],
+              ),
+              style: ElevatedButton.styleFrom(primary: Colors.green),
+            ),
+          ],
         ),
-      ),
-      onPressed: () {
-        if (_pageController.hasClients && _pageController.page! > 0) {
-          _pageController.previousPage(
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min, // Para minimizar el ancho del botón
-        children: [
-          Icon(Icons.arrow_back, color: Colors.white), // Icono
-          Text(" Tareas Anteriores", style: TextStyle(color: Colors.white)), // Texto
-        ],
-      ),
-    ),
-    ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Colors.green, // Color de fondo
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Borde redondeado
-        ),
-      ),
-      onPressed: () {
-        if (_pageController.hasClients &&
-            _pageController.page! < numPages - 1) {
-          _pageController.nextPage(
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min, // Para minimizar el ancho del botón
-        children: [
-          Text("Tareas Siguientes ", style: TextStyle(color: Colors.white)), // Texto
-          Icon(Icons.arrow_forward, color: Colors.white), // Icono
-        ],
-      ),
-    ),
-  ],
-),
-
       ],
     );
   }
 
+  // Función para formatear la hora de la tarea
   String _formatoHora(String fechaRaw) {
     try {
       DateTime fecha = DateTime.parse(fechaRaw);
-      // Incluyendo el día de la semana y la hora
-      return DateFormat('EEEE, HH:mm', 'es_ES')
-          .format(fecha); // EEEE es el día de la semana
+      return DateFormat('EEEE, HH:mm', 'es_ES').format(fecha);
     } catch (e) {
       return 'Fecha desconocida';
     }
   }
 
+  // Widget para construir los botones de navegación de semanas
   Widget _buildBotonesNavegacion() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -231,15 +218,17 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
     );
   }
 
+  // Función para obtener el color de la tarea
   Color _getTareaColor(String tipo) {
     Map<String, Color> colors = {
       'Comanda': Colors.greenAccent,
       'Material': Colors.blueAccent,
       'Fija': Colors.orangeAccent,
     };
-    return colors[tipo] ?? Colors.grey; // Color gris como valor por defecto
+    return colors[tipo] ?? Colors.grey;
   }
 
+  // Función para obtener la imagen de la tarea
   String _getTareaImage(String tipo) {
     Map<String, String> tipoImagenes = {
       'Comanda': 'assets/pictogramas/tarea_comanda.png',
@@ -249,11 +238,13 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
     return tipoImagenes[tipo] ?? 'assets/images/default.png';
   }
 
+  // Función para ajustar la semana actual
   void _ajustarSemanaActual() {
     DateTime ahora = DateTime.now();
     semanaActual = _numeroSemana(ahora);
   }
 
+  // Función para cambiar la semana
   void _cambiarSemana(int cambio) {
     setState(() {
       semanaActual += cambio;
@@ -267,22 +258,21 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
         children: [
           botonSalir(),
           Row(
-          mainAxisAlignment: MainAxisAlignment.center, // Centrar los elementos horizontalmente
-          children: [
-            Image.asset(
-              'assets/pictogramas/tarea_completada.png', // Reemplaza con la ruta de tu imagen
-              width: 120, // Ancho de la imagen
-              height: 120, // Alto de la imagen
-            ),
-            Expanded(
-              child: Text(
-                _rangoSemana(semanaActual),
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/pictogramas/tarea_completada.png',
+                width: 120,
+                height: 120,
               ),
-            ),
-            
-          ],
-        ),
+              Expanded(
+                child: Text(
+                  _rangoSemana(semanaActual),
+                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
           Divider(),
           Expanded(
             child: tareasPorSemana.containsKey(semanaActual)
@@ -294,11 +284,11 @@ class _HistorialAlumnoPageState extends State<HistorialAlumnoPage> {
                         Text("No hay tareas para esta semana",
                             style: TextStyle(fontSize: 20)),
                         SizedBox(
-                            height: 20), // Espacio entre el texto y la imagen
+                            height: 20),
                         Image.asset(
                           'assets/pictogramas/no_hay_tareas.png',
-                          width: 200, // Ancho de la imagen
-                          height: 200, // Alto de la imagen
+                          width: 200,
+                          height: 200,
                         ),
                       ],
                     ),

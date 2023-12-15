@@ -36,6 +36,7 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
     _fetchElementosTarea();
   }
 
+  // Función para obtener los elementos de la tarea
   void _fetchElementosTarea() async {
     try {
       elementosTarea = await fetchElementosTarea(widget.tarea['id']);
@@ -49,6 +50,7 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
     }
   }
 
+  // Construye la tarjeta de cada elemento de la tarea
   Widget _buildElementoTareaCard(ElementoTarea elemento) {
     return Card(
       margin: EdgeInsets.all(16.0),
@@ -58,19 +60,20 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Imagen
-             Semantics(
-          label: 'Pictograma de ${elemento.descripcion}', // Asegúrate de reemplazar 'nombre' con la propiedad correcta de ElementoTarea
-          child: Image.asset(
-            elemento.pictograma,
-            fit: BoxFit.contain,
-            width: double.infinity,
-            height: 150,
-            errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
-          ),
-        ),
+            // Imagen del elemento
+            Semantics(
+              label: 'Pictograma de ${elemento.descripcion}',
+              child: Image.asset(
+                elemento.pictograma,
+                fit: BoxFit.contain,
+                width: double.infinity,
+                height: 150,
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.broken_image),
+              ),
+            ),
             SizedBox(height: 10),
-            // Descripción
+            // Descripción del elemento
             Text(
               "Descripcion: " + elemento.descripcion,
               style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
@@ -81,6 +84,7 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Botón de reducción de cantidad
                 InkWell(
                   onTap: () {
                     int currentValue =
@@ -92,9 +96,8 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                     }
                   },
                   child: CircleAvatar(
-                    radius:
-                        24, // Ajusta el radio para cambiar el tamaño del círculo
-                    backgroundColor: Colors.red, // Fondo rojo
+                    radius: 24,
+                    backgroundColor: Colors.red,
                     child: Icon(Icons.remove, size: 40, color: Colors.white),
                   ),
                 ),
@@ -107,6 +110,7 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                     keyboardType: TextInputType.number,
                   ),
                 ),
+                // Botón de aumento de cantidad
                 InkWell(
                   onTap: () {
                     int currentValue =
@@ -116,9 +120,8 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                         (currentValue + 1).toString();
                   },
                   child: CircleAvatar(
-                    radius:
-                        24, // Ajusta el radio para cambiar el tamaño del círculo
-                    backgroundColor: Colors.green, // Fondo rojo
+                    radius: 24,
+                    backgroundColor: Colors.green,
                     child: Icon(Icons.add, size: 40, color: Colors.white),
                   ),
                 ),
@@ -148,13 +151,15 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
       body: SafeArea(
         child: Column(
           children: [
+            // Función para salir de la página
             botonSalir(),
+            // Tarjeta con información del aula
             Card(
-              color: widget.aulaColor.withOpacity(0.3), // Color de fondo
+              color: widget.aulaColor.withOpacity(0.3),
               elevation: 4.0,
               margin: EdgeInsets.all(8.0),
               child: ListTile(
-                leading: Icon(widget.aulaIcon, size: 30), // Ícono del aula
+                leading: Icon(widget.aulaIcon, size: 30),
                 title: Text(
                   '${widget.tarea['nombre']}: ${widget.aula['nombre']}',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -173,7 +178,6 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                   : Center(child: CircularProgressIndicator()),
             ),
             // Botones de Navegación
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -181,10 +185,9 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary:
-                          Colors.grey, // Color rojo para el botón de retroceso
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12), // Tamaño del botón
+                      primary: Colors.grey,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     onPressed: () {
                       if (_pageController.hasClients &&
@@ -195,12 +198,11 @@ class _AulaComandaAlumnoPageState extends State<AulaComandaAlumnoPage> {
                         );
                       }
                     },
-                    child: Icon(Icons.arrow_back, size: 30), // Icono más grande
+                    child: Icon(Icons.arrow_back, size: 30),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      primary:
-                          Colors.grey, // Color verde para el botón de avance
+                      primary: Colors.grey,
                       padding:
                           EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),

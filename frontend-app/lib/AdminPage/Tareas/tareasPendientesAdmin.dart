@@ -1,14 +1,17 @@
+// Importación de bibliotecas necesarias.
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import '../../network.dart';
 
+// Clase que representa la página de tareas pendientes para el administrador.
 class TareasPendientesAdminPage extends StatefulWidget {
   @override
   _TareasPendientesAdminPageState createState() =>
       _TareasPendientesAdminPageState();
 }
 
-class _TareasPendientesAdminPageState extends State<TareasPendientesAdminPage> {
+class _TareasPendientesAdminPageState
+    extends State<TareasPendientesAdminPage> {
   List<dynamic> tareasCompletadas = [];
   Map<String, List<dynamic>> tareasPorAlumno = {};
 
@@ -18,32 +21,33 @@ class _TareasPendientesAdminPageState extends State<TareasPendientesAdminPage> {
     _fetchCompletedTasks();
   }
 
- void _fetchCompletedTasks() async {
-  try {
-    final fetchedTareas = await fetchCompletedTasks();
-    _organizarTareasPorAlumno(fetchedTareas);
-  } catch (e) {
-    print('Error al obtener tareas completadas: $e');
-  }
-}
-
-
-  void _organizarTareasPorAlumno(List<dynamic> tareasCompletadas) {
-  Map<String, List<dynamic>> tareasPorAlumno = {};
-  for (var tarea in tareasCompletadas) {
-    String nombreAlumno = tarea['nombre_alumno'] ?? 'Desconocido';
-    if (tareasPorAlumno.containsKey(nombreAlumno)) {
-      tareasPorAlumno[nombreAlumno]!.add(tarea);
-    } else {
-      tareasPorAlumno[nombreAlumno] = [tarea];
+  // Método para obtener tareas completadas y organizarlas por alumno.
+  void _fetchCompletedTasks() async {
+    try {
+      final fetchedTareas = await fetchCompletedTasks();
+      _organizarTareasPorAlumno(fetchedTareas);
+    } catch (e) {
+      print('Error al obtener tareas completadas: $e');
     }
   }
-  setState(() {
-    this.tareasPorAlumno = tareasPorAlumno;
-  });
-}
 
+  // Método para organizar tareas por alumno en un mapa.
+  void _organizarTareasPorAlumno(List<dynamic> tareasCompletadas) {
+    Map<String, List<dynamic>> tareasPorAlumno = {};
+    for (var tarea in tareasCompletadas) {
+      String nombreAlumno = tarea['nombre_alumno'] ?? 'Desconocido';
+      if (tareasPorAlumno.containsKey(nombreAlumno)) {
+        tareasPorAlumno[nombreAlumno]!.add(tarea);
+      } else {
+        tareasPorAlumno[nombreAlumno] = [tarea];
+      }
+    }
+    setState(() {
+      this.tareasPorAlumno = tareasPorAlumno;
+    });
+  }
 
+  // Método para confirmar una tarea.
   Future<void> _confirmTask(int asignadaId, int tareaId, String nombreTarea,
       String tipoTarea, int alumnoId) async {
     try {
@@ -65,53 +69,53 @@ class _TareasPendientesAdminPageState extends State<TareasPendientesAdminPage> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final controller = ZoomDrawer.of(context);
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Tareas Pendientes'),
-      leading: IconButton(
-        icon: Icon(Icons.menu),
-        onPressed: () {
-          controller?.toggle();
-        },
+  Widget build(BuildContext context) {
+    final controller = ZoomDrawer.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Tareas Pendientes'),
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            controller?.toggle();
+          },
+        ),
       ),
-    ),
-    body: tareasPorAlumno.isNotEmpty
-        ? ListView(
-            children: tareasPorAlumno.entries.map((entry) {
-              return Card(
-                margin: EdgeInsets.all(8.0),
-                elevation: 4.0,
-                child: ExpansionTile(
-                  title: Text(entry.key, style: TextStyle(fontWeight: FontWeight.bold)),
-                  children: entry.value.map((tarea) {
-                    return ListTile(
-                      title: Text(tarea['nombre_tarea'] ?? 'Sin nombre'),
-                      subtitle: Text(
-                        'Tipo: ${tarea['tipo']} - Último Paso: ${tarea['ultimo_paso'] ?? 'No disponible'}'
-                      ),
-                      trailing: ElevatedButton(
-                        onPressed: () => _confirmTask(
-                          tarea['asignadaId'],
-                          tarea['tareaId'],
-                          tarea['nombre_tarea'],
-                          tarea['tipo'],
-                          tarea['alumno_id'],
+      body: tareasPorAlumno.isNotEmpty
+          ? ListView(
+              children: tareasPorAlumno.entries.map((entry) {
+                return Card(
+                  margin: EdgeInsets.all(8.0),
+                  elevation: 4.0,
+                  child: ExpansionTile(
+                    title: Text(entry.key, style: TextStyle(fontWeight: FontWeight.bold)),
+                    children: entry.value.map((tarea) {
+                      return ListTile(
+                        title: Text(tarea['nombre_tarea'] ?? 'Sin nombre'),
+                        subtitle: Text(
+                          'Tipo: ${tarea['tipo']} - Último Paso: ${tarea['ultimo_paso'] ?? 'No disponible'}'
                         ),
-                        child: Text('Confirmar'),
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.green,
-                          onPrimary: Colors.white,
+                        trailing: ElevatedButton(
+                          onPressed: () => _confirmTask(
+                            tarea['asignadaId'],
+                            tarea['tareaId'],
+                            tarea['nombre_tarea'],
+                            tarea['tipo'],
+                            tarea['alumno_id'],
+                          ),
+                          child: Text('Confirmar'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.green,
+                            onPrimary: Colors.white,
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              );
-            }).toList(),
-          )
-        : Center(child: Text("No hay tareas pendientes de confirmar")),
-  );
-}
+                      );
+                    }).toList(),
+                  ),
+                );
+              }).toList(),
+            )
+          : Center(child: Text("No hay tareas pendientes de confirmar")),
+    );
+  }
 }

@@ -15,6 +15,7 @@ import 'package:audioplayers/src/source.dart';
 
 import 'package:http/http.dart' as http;
 
+// Clase que representa la página para agregar una nueva tarea.
 class AddTaskPage extends StatefulWidget {
   @override
   _AddTaskPageState createState() => _AddTaskPageState();
@@ -28,6 +29,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   AudioPlayer _audioPlayer = AudioPlayer();
   final TextEditingController _taskNameController = TextEditingController();
 
+  // Función para construir la interfaz de usuario de la página.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,16 +42,15 @@ class _AddTaskPageState extends State<AddTaskPage> {
           padding: EdgeInsets.all(16.0),
           children: [
             TextFormField(
-  controller: _taskNameController,
-  decoration: InputDecoration(labelText: 'Nombre de la tarea'),
-  validator: (value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, introduce un nombre';
-    }
-    return null;
-  },
-),
-
+              controller: _taskNameController,
+              decoration: InputDecoration(labelText: 'Nombre de la tarea'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor, introduce un nombre';
+                }
+                return null;
+              },
+            ),
             DropdownButtonFormField<String>(
               hint: Text("Selecciona un tipo"),
               value: _selectedTaskType,
@@ -78,8 +79,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
             SizedBox(height: 20),
             ..._taskElements
                 .map((e) => Container(
-                      margin:
-                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      margin: EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10.0),
@@ -141,7 +142,6 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      // Esto permite que el texto se ajuste al espacio disponible.
                                       child: Text(
                                         e.sonido.split('/').last,
                                         style: TextStyle(
@@ -149,7 +149,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                                           fontStyle: FontStyle.italic,
                                         ),
                                         overflow: TextOverflow
-                                            .ellipsis, // Esto cortará el texto si es demasiado largo.
+                                            .ellipsis,
                                       ),
                                     ),
                                     IconButton(
@@ -183,8 +183,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
     );
   }
 
+  // Función para mostrar un diálogo y añadir un ElementoTarea.
   void _addElement() async {
-    // Mostrar un diálogo para añadir un ElementoTarea
     var element = await showDialog<ElementoTarea>(
         context: context,
         builder: (context) => SingleChildScrollView(
@@ -198,29 +198,30 @@ class _AddTaskPageState extends State<AddTaskPage> {
     }
   }
 
+  // Función para añadir una nueva tarea y sus elementos.
   void _addTask() async {
-  if (_taskFormKey.currentState!.validate()) {
-    try {
+    if (_taskFormKey.currentState!.validate()) {
+      try {
+        Tarea newTask = await addTarea(_taskNameController.text, _selectedTaskType);
 
-      print(_taskNameController.text + _selectedTaskType);
-      Tarea newTask = await addTarea(_taskNameController.text, _selectedTaskType);
-      
-      for (var element in _taskElements) {
-        await addElementoTarea(element.pictograma, element.descripcion, element.sonido, element.video, newTask.id);
+        for (var element in _taskElements) {
+          await addElementoTarea(element.pictograma, element.descripcion, element.sonido, element.video, newTask.id);
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tarea añadida exitosamente')),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tarea añadida exitosamente')),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
   }
 }
-}
+
+// Diálogo para agregar un elemento de tarea.
 class AddElementDialog extends StatefulWidget {
   @override
   _AddElementDialogState createState() => _AddElementDialogState();
@@ -234,6 +235,7 @@ class _AddElementDialogState extends State<AddElementDialog> {
   String? _selectedImage;
   AudioPlayer _audioPlayer = AudioPlayer();
 
+  // Función para construir la interfaz de usuario del diálogo.
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -297,12 +299,12 @@ class _AddElementDialogState extends State<AddElementDialog> {
     );
   }
 
+  // Función para añadir un nuevo elemento de tarea.
   void _addElement() {
     if (_formKey.currentState!.validate()) {
       var element = ElementoTarea(
         id: 0, // Este ID será reemplazado cuando se guarde en el servidor
         pictograma: _selectedImage!,
-
         descripcion: _descripcion,
         sonido: _sonido,
       );
@@ -311,6 +313,7 @@ class _AddElementDialogState extends State<AddElementDialog> {
     }
   }
 
+  // Función para seleccionar una imagen.
   void _selectImage() async {
     final imagePath = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -325,6 +328,7 @@ class _AddElementDialogState extends State<AddElementDialog> {
     }
   }
 
+  // Función para seleccionar un archivo de audio.
   void _selectAudio() async {
     final manifestContent = await rootBundle.loadString('AssetManifest.json');
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
@@ -383,6 +387,7 @@ class _AddElementDialogState extends State<AddElementDialog> {
     }
   }
 
+  // Función para verificar si una ruta es un archivo de audio.
   bool _isAudioFile(String path) {
     final allowedExtensions = ['.mp3', '.wav', '.ogg'];
     return allowedExtensions.any((ext) => path.toLowerCase().endsWith(ext));

@@ -4,15 +4,12 @@ import 'AdminPage/inicio.dart';
 import 'login.dart';
 import 'AdminPage/Alumnos/agregarEstudiante.dart';
 
-//adminUser
-//securePassword
-
-//juanprez 3241
-//anagmez con texto
+// Esta es la función principal que se ejecuta cuando se inicia la aplicación.
 void main() {
   runApp(MyApp());
 }
 
+// La clase MyApp define la estructura principal de la aplicación.
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -23,8 +20,11 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
+        // Ruta inicial que muestra la página de LoadingPage.
         '/': (context) => LoadingPage(),
+        // Ruta '/home' que muestra la página MyHomePage.
         '/home': (context) => MyHomePage(title: 'Pagina de Inicio'),
+        // Ruta '/addStudent' que muestra la página AddStudentPage.
         '/addStudent': (context) => AddStudentPage(), 
       },
     );

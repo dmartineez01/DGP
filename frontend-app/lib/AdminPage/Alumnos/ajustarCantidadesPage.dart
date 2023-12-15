@@ -1,31 +1,42 @@
+// Importación de bibliotecas necesarias.
 import 'package:flutter/material.dart';
 import 'package:frontend_app/Modelos/ElementoTarea.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+// Importación de funciones relacionadas con la red desde 'network.dart'.
 import '../../network.dart';
 
+// Clase que representa la página para ajustar cantidades de elementos de tarea.
 class AjustarCantidadesPage extends StatefulWidget {
   final int tareaId;
   final int materialAsignadaId;
 
-  AjustarCantidadesPage({Key? key, required this.tareaId, required this.materialAsignadaId}) : super(key: key);
+  // Constructor que recibe el ID de la tarea y el ID del material asignado.
+  AjustarCantidadesPage({
+    Key? key,
+    required this.tareaId,
+    required this.materialAsignadaId,
+  }) : super(key: key);
 
   @override
   _AjustarCantidadesPageState createState() => _AjustarCantidadesPageState();
 }
 
 class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
+  // Mapa de controladores para gestionar las cantidades de los elementos de tarea.
   Map<int, TextEditingController> _controllers = {};
 
   @override
   void dispose() {
-    // Limpieza de los controladores al salir de la pantalla
+    // Limpieza de los controladores al salir de la pantalla.
     _controllers.forEach((key, controller) => controller.dispose());
     super.dispose();
   }
 
-  Future<bool> asignarCantidadMaterialElemento(int materialAsignadaId, int elementoTareaId, int cantidad) async {
+  // Función asincrónica para asignar una cantidad a un elemento de tarea.
+  Future<bool> asignarCantidadMaterialElemento(
+      int materialAsignadaId, int elementoTareaId, int cantidad) async {
     final url = Uri.parse('http://10.0.2.2:3000/material-elemento');
     final headers = {"Content-Type": "application/json"};
     final body = json.encode({
@@ -42,11 +53,11 @@ class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
         final success = responseData['success'] as bool;
         return success;
       } else {
-        // Handle error cases, e.g., by throwing an exception or returning false.
+        // Maneja los casos de error, por ejemplo, arrojando una excepción o devolviendo false.
         return false;
       }
     } catch (e) {
-      // Handle network-related errors, e.g., by throwing an exception or returning false.
+      // Maneja los errores relacionados con la red, por ejemplo, arrojando una excepción o devolviendo false.
       return false;
     }
   }
@@ -68,7 +79,7 @@ class _AjustarCantidadesPageState extends State<AjustarCantidadesPage> {
                   var elemento = snapshot.data![index];
                   var controller = _controllers.putIfAbsent(
                     elemento.id,
-                    () => TextEditingController(text: '1'), // Inicializa con 1 por defecto
+                    () => TextEditingController(text: '1'), // Inicializa con 1 por defecto.
                   );
 
                   return Card(

@@ -1,12 +1,9 @@
 import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_app/login.dart';
-
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:animate_do/animate_do.dart';
-
 
 class LoadingPage extends StatefulWidget {
   @override
@@ -17,21 +14,24 @@ class _LoadingPageState extends State<LoadingPage> {
   @override
   void initState() {
     super.initState();
+    // Llama a la función inicializar al inicio de la página
     inicializar();
   }
 
+  // Función para inicializar la página y luego redirigir a LoginPage después de 5 segundos
   void inicializar() async {
     Timer(
-        Duration(seconds: 5),
-        () => Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (c, a1, a2) => LoginPage(),
-                transitionsBuilder: (c, anim, a2, child) =>
-                    FadeTransition(opacity: anim, child: child),
-                transitionDuration: Duration(milliseconds: 1000),
-              ),
-            ));
+      Duration(seconds: 5),
+      () => Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (c, a1, a2) => LoginPage(),
+          transitionsBuilder: (c, anim, a2, child) =>
+              FadeTransition(opacity: anim, child: child),
+          transitionDuration: Duration(milliseconds: 1000),
+        ),
+      ),
+    );
   }
 
   @override
@@ -53,8 +53,9 @@ class _LoadingPageState extends State<LoadingPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           image: DecorationImage(
-              image: AssetImage("assets/images/accessibilityCoders.png"),
-              fit: BoxFit.fitWidth),
+            image: AssetImage("assets/images/accessibilityCoders.png"),
+            fit: BoxFit.fitWidth,
+          ),
         ),
       ),
     );

@@ -1,9 +1,10 @@
-// InfoTarea.dart
+// Importación de bibliotecas y archivos necesarios.
 import 'package:flutter/material.dart';
 import '../../Modelos/Tarea.dart';
 import '../../Modelos/ElementoTarea.dart';
 import '../../network.dart';
 
+// Clase que representa la pantalla de información de una tarea.
 class InfoTarea extends StatefulWidget {
   final Tarea tarea;
 
@@ -16,12 +17,14 @@ class InfoTarea extends StatefulWidget {
 class _InfoTareaState extends State<InfoTarea> {
   late Future<List<ElementoTarea>> futureElementosTarea;
 
+  // Inicialización de la pantalla y carga de datos.
   @override
   void initState() {
     super.initState();
     futureElementosTarea = fetchElementosTarea(widget.tarea.id);
   }
 
+  // Construcción de la interfaz de usuario.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

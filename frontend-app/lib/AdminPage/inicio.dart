@@ -12,7 +12,7 @@ import 'Tareas/TareasPage.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 
 final ZoomDrawerController controller = ZoomDrawerController();
-
+// Página principal de la aplicación.
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
@@ -22,12 +22,14 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+// Estado de la página principal.
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0; // índice de la página seleccionada
+  int _selectedIndex = 0; // Índice de la página seleccionada
 
+  // Función para cambiar la página seleccionada al tocar un ítem de la barra de navegación.
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // actualizar el índice de la página seleccionada
+      _selectedIndex = index; // Actualizar el índice de la página seleccionada
     });
   }
 
@@ -40,11 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
       TareasPendientesAdminPage(),
       TareasFinalizadasAdminPage(),
       ConfigPage()
-    ]; // lista de páginas
+    ]; // Lista de páginas
 
     return ZoomDrawer(
       controller: controller,
-      mainScreen: pages[_selectedIndex], // mostrar la página seleccionada
+      mainScreen: pages[_selectedIndex], // Mostrar la página seleccionada
       menuScreen: MenuScreen(controller: controller, onItemTapped: _onItemTapped),
       borderRadius: 24,
       showShadow: true,

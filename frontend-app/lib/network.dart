@@ -24,6 +24,7 @@ Future<List<dynamic>> fetchAlumnos() async {
   }
 }
 
+// Función para obtener un alumno específico por ID
 Future<dynamic> fetchAlumno(int id) async {
   final url = Uri.parse('http://10.0.2.2:3000/alumnos/$id');
   final response = await http.get(url);
@@ -35,7 +36,7 @@ Future<dynamic> fetchAlumno(int id) async {
   }
 }
 
-
+// Función para agregar un estudiante
 Future<bool> addStudent(String nombre, String password, bool imagen, bool texto, bool audio) async {
   final url = Uri.parse('http://10.0.2.2:3000/alumnos');
   final response = await http.post(
@@ -44,9 +45,9 @@ Future<bool> addStudent(String nombre, String password, bool imagen, bool texto,
     body: json.encode({
       'nombre': nombre,
       'password': password,
-      'imagen': imagen ? 1 : 0,  // Clave en minúsculas
-      'texto': texto ? 1 : 0,    // Clave en minúsculas
-      'audio': audio ? 1 : 0,    // Clave en minúsculas
+      'imagen': imagen ? 1 : 0,
+      'texto': texto ? 1 : 0,
+      'audio': audio ? 1 : 0,
     }),
   );
 
@@ -58,6 +59,7 @@ Future<bool> addStudent(String nombre, String password, bool imagen, bool texto,
   }
 }
 
+// Función para eliminar un alumno por ID
 Future<bool> deleteAlumno(int id) async {
   final url = Uri.parse('http://10.0.2.2:3000/alumnos/$id');
   final response = await http.delete(url);
@@ -69,6 +71,7 @@ Future<bool> deleteAlumno(int id) async {
   }
 }
 
+// Función para actualizar un alumno por ID
 Future<bool> updateAlumno(int id, String nombre, int imagen, int texto, int audio, String password) async {
   final url = Uri.parse('http://10.0.2.2:3000/alumnos/$id');
   final response = await http.put(
@@ -84,7 +87,6 @@ Future<bool> updateAlumno(int id, String nombre, int imagen, int texto, int audi
   );
   return response.statusCode == 200;
 }
-
 
 // Función para obtener tareas
 Future<List<Tarea>> fetchTareas() async {
@@ -119,7 +121,7 @@ Future<List<ElementoTarea>> fetchElementosTarea(int tareaId) async {
   }
 }
 
-// Función para añadir tarea
+// Función para agregar una tarea
 Future<Tarea> addTarea(String nombre, String tipo) async {
   final response = await http.post(
     Uri.parse('http://10.0.2.2:3000/tareas'),
@@ -140,8 +142,7 @@ Future<Tarea> addTarea(String nombre, String tipo) async {
   }
 }
 
-// Frontend: En tu aplicación Flutter
-
+// Función para eliminar una tarea por ID
 Future<bool> deleteTarea(int id) async {
   final response = await http.delete(
     Uri.parse('http://10.0.2.2:3000/tareas/$id'),
@@ -157,8 +158,7 @@ Future<bool> deleteTarea(int id) async {
   }
 }
 
-
-// Función para añadir un elemento de tarea
+// Función para agregar un elemento de tarea
 Future<ElementoTarea> addElementoTarea(String pictograma, String descripcion, String sonido, String? video, int tareaId) async {
   final response = await http.post(
     Uri.parse('http://10.0.2.2:3000/tareas/$tareaId/elementos'),
@@ -187,6 +187,7 @@ Future<ElementoTarea> addElementoTarea(String pictograma, String descripcion, St
   }
 }
 
+// Funcion para asignar una tarea a un alumno
 Future<int?> assignTaskToStudent(int alumnoId, int tareaId, String tipo) async {
   final response;
   if (tipo == "Material") {
@@ -199,8 +200,6 @@ Future<int?> assignTaskToStudent(int alumnoId, int tareaId, String tipo) async {
       }),
     );
   } else if (tipo == "Fija") {
-
-    print("holaaaaa");
     response = await http.post(
       Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/asignar-tarea-fija'),
       headers: {"Content-Type": "application/json"},
@@ -231,7 +230,7 @@ Future<int?> assignTaskToStudent(int alumnoId, int tareaId, String tipo) async {
   }
 }
 
-
+// Funcion para asignar cierta cantidad a un ElementoTarea
 Future<bool> asignarCantidadMaterialElemento(int materialAsignadaId, int elementoTareaId, int cantidad) async {
   final url = Uri.parse('http://10.0.2.2:3000/material-elemento');
   final headers = {"Content-Type": "application/json"};
@@ -249,17 +248,16 @@ Future<bool> asignarCantidadMaterialElemento(int materialAsignadaId, int element
       final success = responseData['success'] as bool;
       return success;
     } else {
-      // Handle error cases, e.g., by throwing an exception or returning false.
+      // Maneja casos de error, por ejemplo, lanzando una excepción o retornando false.
       return false;
     }
   } catch (e) {
-    // Handle network-related errors, e.g., by throwing an exception or returning false.
+    // Maneja errores relacionados con la red, por ejemplo, lanzando una excepción o retornando false.
     return false;
   }
 }
 
-
-
+// Funcion para obtener todas las tareas asignadas
 Future<List<dynamic>> fetchAllAssignedTasksForStudent(int alumnoId) async {
   final uri = Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/tareas-asignadas');
   final response = await http.get(uri);
@@ -272,7 +270,7 @@ Future<List<dynamic>> fetchAllAssignedTasksForStudent(int alumnoId) async {
   }
 }
 
-
+// Funcion para obtener todas las aulas de la base de datos
 Future<List<dynamic>> fetchAulas() async {
   final uri = Uri.parse('http://10.0.2.2:3000/aulas');
   final response = await http.get(uri);
@@ -286,6 +284,7 @@ Future<List<dynamic>> fetchAulas() async {
   }
 }
 
+// Funcion para crear una ComandaElemento en la base de datos
 Future<bool> createComandaElemento(int comandaAsignadaId, int elementoTareaId, int cantidad, int idAula) async {
   final url = Uri.parse('http://10.0.2.2:3000/comanda-elemento');
   final headers = {"Content-Type": "application/json"};
@@ -306,8 +305,10 @@ Future<bool> createComandaElemento(int comandaAsignadaId, int elementoTareaId, i
   }
 }
 
+
 //------------------------------
 
+// Obtiene la cantidad de un elemento de tarea
 Future<int?> obtenerCantidadElemento(int elementoId) async {
   final url = Uri.parse('http://10.0.2.2:3000/material-elemento/$elementoId');
   final response = await http.get(url);
@@ -329,6 +330,7 @@ Future<int?> obtenerCantidadElemento(int elementoId) async {
   }
 }
 
+// Actualiza el estado de completado de una tarea
 Future<bool> updateTaskCompletionStatus(int alumnoId, int tareaId, String tipo, bool completada, int ultimoPaso) async {
   final String endpoint;
   switch (tipo) {
@@ -360,6 +362,7 @@ Future<bool> updateTaskCompletionStatus(int alumnoId, int tareaId, String tipo, 
   }
 }
 
+// Obtiene los detalles de una tarea asignada a un alumno
 Future<dynamic> fetchAssignedTask(int alumnoId, String tipo, int id) async {
   final url = Uri.parse('http://10.0.2.2:3000/alumnos/$alumnoId/tareas/$tipo/$id');
   final response = await http.get(url);
@@ -374,8 +377,7 @@ Future<dynamic> fetchAssignedTask(int alumnoId, String tipo, int id) async {
   }
 }
 
-//-----------------------------------
-
+// Obtiene la lista de tareas completadas
 Future<List<dynamic>> fetchCompletedTasks() async {
   final response = await http.get(Uri.parse('http://10.0.2.2:3000/tareas-completadas'));
   if (response.statusCode == 200) {
@@ -386,6 +388,7 @@ Future<List<dynamic>> fetchCompletedTasks() async {
   }
 }
 
+// Confirma una tarea como finalizada
 Future<bool> confirmTask(int asignadaId, int tareaId, int alumnoId, String nombre, String tipo) async {
   final response = await http.post(
     Uri.parse('http://10.0.2.2:3000/confirmar-tarea'),
@@ -402,6 +405,7 @@ Future<bool> confirmTask(int asignadaId, int tareaId, int alumnoId, String nombr
   return response.statusCode == 200;
 }
 
+// Obtiene la lista de tareas finalizadas
 Future<List<dynamic>> fetchFinalizedTasks() async {
   final response = await http.get(Uri.parse('http://10.0.2.2:3000/tareas-finalizadas'));
   if (response.statusCode == 200) {
@@ -411,6 +415,7 @@ Future<List<dynamic>> fetchFinalizedTasks() async {
   }
 }
 
+// Obtiene el historial de tareas de un alumno
 Future<List<dynamic>> fetchHistorialAlumno(int alumnoId) async {
   final response = await http.get(Uri.parse('http://10.0.2.2:3000/historial-alumno/$alumnoId'));
   print(response.body);

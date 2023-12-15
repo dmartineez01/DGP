@@ -6,6 +6,7 @@ class LoginPasswordAlumno extends StatelessWidget {
   final dynamic alumno;
   final String image;
 
+  // Constructor de LoginPasswordAlumno
   LoginPasswordAlumno({Key? key, required this.alumno, required this.image}) : super(key: key);
 
   @override
@@ -28,14 +29,14 @@ class LoginPasswordAlumno extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Center(
-              child: Text(
-                "Por favor, introduce la contraseña",
-                style: TextStyle(
-                  fontSize: 24, // Tamaño de letra aumentado
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+                    child: Text(
+                      "Por favor, introduce la contraseña",
+                      style: TextStyle(
+                        fontSize: 24, // Tamaño de letra aumentado
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   TextField(
                     controller: _passwordController,
                     obscureText: true,

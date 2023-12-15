@@ -1,7 +1,9 @@
+// Importación de bibliotecas necesarias.
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import '../../network.dart';
 
+// Clase que representa la página de configuración.
 class ConfigPage extends StatefulWidget {
   @override
   _ConfigPageState createState() => _ConfigPageState();
@@ -28,13 +30,13 @@ class _ConfigPageState extends State<ConfigPage> {
         child: Column(
           children: <Widget>[
             Text(
-              'Aqui no hay nada por ahora',
+              'Aqui no hay nada por ahora', // Mensaje temporal
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20), // Espaciado vertical
           ],
         ),
       ),

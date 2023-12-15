@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import '../../network.dart';
 
+// Clase para la página de administradores.
 class AdministradoresPage extends StatefulWidget {
   @override
   _AdministradoresPageState createState() => _AdministradoresPageState();
@@ -15,6 +16,7 @@ class _AdministradoresPageState extends State<AdministradoresPage> {
   @override
   void initState() {
     super.initState();
+    // Inicializa la lista de administradores y agrega un listener para el campo de búsqueda.
     futureAdministradores = fetchAdministradores();
     _searchController.addListener(() {
       _filterAdministradores(_searchController.text);
@@ -33,7 +35,7 @@ class _AdministradoresPageState extends State<AdministradoresPage> {
       });
     } else {
       setState(() {
-        _filteredAdministradores = null;
+        _filteredAdministradores = null; // Borra la lista filtrada si la consulta está vacía.
       });
     }
   }
@@ -43,7 +45,7 @@ class _AdministradoresPageState extends State<AdministradoresPage> {
       cells: [
         DataCell(Text(admin['username'].toString())),
         DataCell(Text(admin['password'].toString())),
-        // Puedes agregar botón de editar aquí si es necesario
+        // Puedes agregar un botón de editar aquí si es necesario.
       ],
     );
   }
@@ -101,7 +103,7 @@ class _AdministradoresPageState extends State<AdministradoresPage> {
                             columns: const [
                               DataColumn(label: Text('Usuario')),
                               DataColumn(label: Text('Contraseña')),
-                              // DataColumn(label: Text('Editar')), // Si necesitas una columna para editar
+                              // DataColumn(label: Text('Editar')), // Si necesitas una columna para editar.
                             ],
                             rows: adminsToShow.map((admin) => _createRow(admin)).toList(),
                           ),

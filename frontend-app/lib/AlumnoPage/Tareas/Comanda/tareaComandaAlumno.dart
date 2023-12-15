@@ -21,24 +21,23 @@ class TareaComandaAlumnoPage extends StatefulWidget {
 
 class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
   List<dynamic> aulas = [];
-  bool isTaskCompleted =
-      false; // Añade esta variable para el estado de completitud
+  bool isTaskCompleted = false;
 
   @override
   void initState() {
     super.initState();
     _fetchAulas();
-    _checkTaskCompletion(); // Llama a la función para verificar el estado de completitud
+    _checkTaskCompletion(); // Verificar el estado de completitud
   }
 
+  // Función para verificar el estado de completitud de la tarea
   void _checkTaskCompletion() async {
     try {
       final taskData = await fetchAssignedTask(
           widget.alumnoId, widget.tarea['tipo'], widget.comandaAsignadaId);
       if (taskData != null && taskData['completada'] != null) {
         setState(() {
-          isTaskCompleted = taskData['completada'] ==
-              1; // Asume que 'completada' es un entero
+          isTaskCompleted = taskData['completada'] == 1; // Convertir a booleano
         });
       }
     } catch (e) {
@@ -46,6 +45,7 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
     }
   }
 
+  // Función para obtener la lista de aulas
   void _fetchAulas() async {
     try {
       final fetchedAulas = await fetchAulas();
@@ -57,6 +57,7 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
     }
   }
 
+  // Widget para el botón de completar la tarea
   Widget _buildCompleteButton() {
     final String buttonText =
         isTaskCompleted ? 'Marcar como Pendiente' : 'Completar Tarea';
@@ -91,7 +92,7 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
     return Scaffold(
       body: Column(
         children: [
-          botonSalir(),
+          botonSalir(), // Widget para salir de la página
           Text(
             "Tarea: " + widget.tarea["nombre"],
             style: TextStyle(
@@ -104,10 +105,9 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           Semantics(
-            label:
-                'Imagen representativa de un aula', // Descripción adecuada de la imagen
+            label: 'Imagen representativa de un aula', // Descripción de la imagen
             child: Image.asset(
-              'assets/pictogramas/aula.png', // Asegúrate de tener esta imagen en tus assets
+              'assets/pictogramas/aula.png', // Ruta de la imagen
               width: 400,
               height: 150,
             ),
@@ -117,23 +117,22 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
               itemCount: aulas.length,
               itemBuilder: (context, index) {
                 final aula = aulas[index];
-                Color aulaColor = _getAulaColor(aula[
-                    'id']); // Función para obtener un color basado en el ID
-                IconData aulaIcon = _getAulaIcon(aula[
-                    'id']); // Función para obtener un ícono basado en el tipo de aula
+                Color aulaColor = _getAulaColor(aula['id']); // Obtener color del aula
+                IconData aulaIcon = _getAulaIcon(aula['id']); // Obtener ícono del aula
 
                 return Card(
-                  color: aulaColor.withOpacity(0.3), // Color de fondo
+                  color: aulaColor.withOpacity(0.3),
                   elevation: 4.0,
                   margin: EdgeInsets.all(8.0),
                   child: ListTile(
-                    leading: Icon(aulaIcon, size: 30), // Ícono del aula
+                    leading: Icon(aulaIcon, size: 30),
                     title: Text(
                       aula['nombre'],
                       style:
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     onTap: () {
+                      // Navegar a la página del aula
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => AulaComandaAlumnoPage(
                             tarea: widget.tarea,
@@ -148,16 +147,14 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
               },
             ),
           ),
-          _buildCompleteButton()
+          _buildCompleteButton() // Widget del botón de completar la tarea
         ],
       ),
     );
   }
 
+  // Función para obtener un color basado en el ID del aula
   Color _getAulaColor(int id) {
-    // Esta función devuelve un color basado en el ID del aula
-    // Por ejemplo, puedes asignar colores específicos a IDs específicos
-    // o usar una lógica para generar colores de manera más dinámica
     List<Color> colors = [
       Colors.red,
       Colors.green,
@@ -166,15 +163,11 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
       Colors.purple,
       Colors.yellow,
     ];
-    // Esto asignará un color de la lista de forma cíclica basada en el ID
     return colors[id % colors.length];
   }
 
+  // Función para obtener un ícono basado en el tipo de aula
   IconData _getAulaIcon(int id) {
-    // Esta función devuelve un ícono basado en el tipo de aula
-    // La lógica puede variar dependiendo de cómo identifiques los tipos de aula
-    // Por ejemplo, puedes usar un switch o una serie de condicionales
-    // Aquí se da un ejemplo simple con algunos íconos comunes
     List<IconData> icons = [
       Icons.school,
       Icons.science,
@@ -183,7 +176,6 @@ class _TareaComandaAlumnoPageState extends State<TareaComandaAlumnoPage> {
       Icons.computer,
       Icons.local_library,
     ];
-    // Esto asignará un ícono de la lista de forma cíclica basada en el ID
     return icons[id % icons.length];
   }
 }

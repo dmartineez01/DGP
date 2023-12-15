@@ -8,14 +8,17 @@ class MenuScreen extends StatelessWidget {
   final ZoomDrawerController controller;
   final Function(int) onItemTapped;
 
+  // Constructor de MenuScreen
   MenuScreen({required this.controller, required this.onItemTapped});
 
   @override
   Widget build(BuildContext context) {
+    // Interfaz del menú principal
     return Material(
       color: Colors.blue[800],
       child: Column(
         children: [
+          // Encabezado del usuario
           UserAccountsDrawerHeader(
             accountName: Text(
               'Administrador',
@@ -37,9 +40,9 @@ class MenuScreen extends StatelessWidget {
                   leading: Icon(Icons.assignment, color: Colors.white),
                   title: Text('Tareas', style: TextStyle(color: Colors.white)),
                   children: <Widget>[
-                    _buildMenuItem(Icons.list, 'Tareas Totales', 2), // Índice 4 para 'Tareas Totales'
-                    _buildMenuItem(Icons.hourglass_empty, 'Tareas Pendientes', 3), // Índice 5 para 'Tareas Pendientes'
-                    _buildMenuItem(Icons.flag_sharp, 'Tareas Finalizadas', 4), // Índice 5 para 'Tareas Pendientes'
+                    _buildMenuItem(Icons.list, 'Tareas Totales', 2),
+                    _buildMenuItem(Icons.hourglass_empty, 'Tareas Pendientes', 3),
+                    _buildMenuItem(Icons.flag_sharp, 'Tareas Finalizadas', 4),
                   ],
                 ),
                 _buildMenuItem(Icons.settings, 'Configuración', 5),
@@ -65,13 +68,14 @@ class MenuScreen extends StatelessWidget {
     );
   }
 
+  // Función para construir un elemento de menú
   Widget _buildMenuItem(IconData icon, String title, int index) {
     return ListTile(
       leading: Icon(icon, color: Colors.white),
       title: Text(title, style: TextStyle(color: Colors.white)),
       onTap: () {
         onItemTapped(index);
-        controller.close!();
+        controller.close!(); // Cierra el menú deslizable
       },
     );
   }
@@ -81,6 +85,7 @@ class botonSalir extends StatelessWidget {
   final String title;
   final String subtitle;
 
+  // Constructor de botonSalir
   botonSalir({Key? key, this.title = 'Salir', this.subtitle = 'Volver atrás'})
       : super(key: key);
 

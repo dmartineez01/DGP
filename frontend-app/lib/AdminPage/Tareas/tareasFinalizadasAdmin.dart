@@ -1,8 +1,10 @@
+// Importación de bibliotecas necesarias.
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:intl/intl.dart';
 import '../../network.dart';
 
+// Clase que representa la página de tareas finalizadas para administradores.
 class TareasFinalizadasAdminPage extends StatefulWidget {
   @override
   _TareasFinalizadasAdminPageState createState() =>
@@ -14,6 +16,7 @@ class _TareasFinalizadasAdminPageState
   List<dynamic> tareasFinalizadas = [];
   Map<String, List<dynamic>> tareasPorAlumno = {};
 
+  // Organiza las tareas finalizadas por alumno.
   void _organizarTareasPorAlumno(List<dynamic> tareasFinalizadas) {
     tareasPorAlumno.clear();
     for (var tarea in tareasFinalizadas) {
@@ -26,23 +29,24 @@ class _TareasFinalizadasAdminPageState
     }
   }
 
+  // Formatea la fecha en el formato deseado.
   String _formatDate(String? rawDate) {
-  if (rawDate == null) return 'Desconocida';
-  try {
-    final date = DateTime.parse(rawDate);
-    return DateFormat('dd/MM/yyyy HH:mm').format(date); // Incluir fecha y hora
-  } catch (e) {
-    return 'Formato inválido';
+    if (rawDate == null) return 'Desconocida';
+    try {
+      final date = DateTime.parse(rawDate);
+      return DateFormat('dd/MM/yyyy HH:mm').format(date); // Incluir fecha y hora
+    } catch (e) {
+      return 'Formato inválido';
+    }
   }
-}
 
-  
   @override
   void initState() {
     super.initState();
     _fetchFinalizedTasks();
   }
 
+  // Obtiene las tareas finalizadas desde la red.
   void _fetchFinalizedTasks() async {
     try {
       final fetchedTareas = await fetchFinalizedTasks();
@@ -82,7 +86,8 @@ class _TareasFinalizadasAdminPageState
                     children: entry.value.map((tarea) {
                       return Container(
                         decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+                          border: Border(
+                              bottom: BorderSide(color: Colors.grey.shade300)),
                         ),
                         child: ListTile(
                           leading: _getIconForTaskType(tarea['tipo']),
@@ -91,9 +96,9 @@ class _TareasFinalizadasAdminPageState
                             style: TextStyle(fontWeight: FontWeight.w500),
                           ),
                           subtitle: Text(
-          'Fecha finalización: ${_formatDate(tarea['fecha_finalizacion'])}',
-          style: TextStyle(color: Colors.grey.shade600),
-        ),
+                            'Fecha finalización: ${_formatDate(tarea['fecha_finalizacion'])}',
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
                         ),
                       );
                     }).toList(),
@@ -105,6 +110,7 @@ class _TareasFinalizadasAdminPageState
     );
   }
 
+  // Obtiene el ícono correspondiente según el tipo de tarea.
   Icon _getIconForTaskType(String? tipo) {
     switch (tipo) {
       case 'Comanda':

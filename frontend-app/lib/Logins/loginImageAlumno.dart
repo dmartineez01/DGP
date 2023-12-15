@@ -6,6 +6,7 @@ class LoginImageAlumno extends StatefulWidget {
   final dynamic alumno;
   final String image;
 
+  // Constructor de LoginImageAlumno
   LoginImageAlumno({Key? key, required this.alumno, required this.image})
       : super(key: key);
 
@@ -24,6 +25,7 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
     "contraseña6.jpg"
   ];
 
+  // Función para seleccionar una imagen
   void _selectImage(int index) {
     int adjustedIndex = index + 1; // Ajusta el índice para que comience en 1
     List<int> newSequence = [...selectedImageIndices, adjustedIndex];
@@ -50,7 +52,7 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
             children: <Widget>[
               Icon(Icons.cancel,
                   color: Colors.white,
-                  size: 80), // Ícono de cruceta blanca grande
+                  size: 80), // Ícono de cruzeta blanca grande
               Expanded(
                 child: Text('Incorrecto',
                     textAlign: TextAlign.center,
@@ -69,6 +71,7 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
     }
   }
 
+  // Navega a la página de inicio del alumno
   void _navigateToInicioPage() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) =>
@@ -76,6 +79,7 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
     ));
   }
 
+  // Comprueba si la secuencia de imágenes es correcta
   void _checkImageSequence() {
     // Convierte la secuencia de índices en la secuencia de números como string
     String selectedSequence =
@@ -90,6 +94,7 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
     }
   }
 
+  // Construye la lista de imágenes seleccionadas
   Widget _buildSelectedImages() {
     return Container(
       margin: EdgeInsets.all(10),
@@ -135,6 +140,7 @@ class _LoginImageAlumnoState extends State<LoginImageAlumno> {
 
   @override
   Widget build(BuildContext context) {
+    // Interfaz de la página de inicio de alumno con imágenes de contraseña
     return Scaffold(
       body: Column(
         children: [

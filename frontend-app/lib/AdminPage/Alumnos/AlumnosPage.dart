@@ -1,9 +1,11 @@
+// Importación de bibliotecas necesarias.
 import 'package:flutter/material.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:frontend_app/AdminPage/Alumnos/AlumnoAdminPage.dart';
 import '../../network.dart';
 import 'agregarEstudiante.dart';
 
+// Clase que representa la página de visualización y gestión de alumnos.
 class AlumnosPage extends StatefulWidget {
   @override
   _AlumnosPageState createState() => _AlumnosPageState();
@@ -17,13 +19,13 @@ class _AlumnosPageState extends State<AlumnosPage> {
   @override
   void initState() {
     super.initState();
-    futureAlumnos =
-        fetchAlumnos(); // Asegúrate de que esta función esté actualizada con la nueva estructura de datos
+    futureAlumnos = fetchAlumnos(); // Obtener la lista de alumnos.
     _searchController.addListener(() {
-      _filterAlumnos(_searchController.text);
+      _filterAlumnos(_searchController.text); // Aplicar filtro de búsqueda.
     });
   }
 
+  // Función para filtrar la lista de alumnos según la búsqueda.
   void _filterAlumnos(String query) {
     if (query.isNotEmpty) {
       futureAlumnos.then((list) {
@@ -37,20 +39,21 @@ class _AlumnosPageState extends State<AlumnosPage> {
     } else {
       setState(() {
         _filteredAlumnos =
-            null; // Clear the filtered list if the query is empty
+            null; // Limpiar la lista filtrada si la consulta está vacía.
       });
     }
   }
 
+  // Función para crear una fila de datos para un alumno en la tabla.
   DataRow _createRow(dynamic alumno) {
     return DataRow(
       cells: [
         DataCell(Text(alumno['id'].toString())),
         DataCell(Text(alumno['nombre'].toString())),
         DataCell(Text(alumno['password'].toString())),
-        DataCell(Text(alumno['Imagen'] == 1 ? "Sí" : "No")), // Cambiado aquí
-        DataCell(Text(alumno['Texto'] == 1 ? "Sí" : "No")), // Cambiado aquí
-        DataCell(Text(alumno['Audio'] == 1 ? "Sí" : "No")), // Cambiado aquí
+        DataCell(Text(alumno['Imagen'] == 1 ? "Sí" : "No")),
+        DataCell(Text(alumno['Texto'] == 1 ? "Sí" : "No")),
+        DataCell(Text(alumno['Audio'] == 1 ? "Sí" : "No")),
         DataCell(IconButton(
           icon: Icon(Icons.edit),
           onPressed: () {
@@ -61,7 +64,7 @@ class _AlumnosPageState extends State<AlumnosPage> {
               ),
             )
                 .then((_) {
-              // Recarga los alumnos después de regresar de la página de edición
+              // Recargar la lista de alumnos después de la edición.
               setState(() {
                 futureAlumnos = fetchAlumnos();
               });
@@ -120,10 +123,10 @@ class _AlumnosPageState extends State<AlumnosPage> {
                       var alumnosToShow = _filteredAlumnos ?? snapshot.data!;
                       return SingleChildScrollView(
                         scrollDirection: Axis
-                            .horizontal, // Desplazamiento horizontal para la tabla
+                            .horizontal, // Desplazamiento horizontal para la tabla.
                         child: SingleChildScrollView(
                           child: DataTable(
-                            // Desplazamiento vertical para las filas de la tabla
+                            // Desplazamiento vertical para las filas de la tabla.
                             columns: const [
                               DataColumn(label: Text('ID')),
                               DataColumn(label: Text('Nombre')),

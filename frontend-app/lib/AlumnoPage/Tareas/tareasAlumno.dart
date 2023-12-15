@@ -8,10 +8,10 @@ import 'package:frontend_app/Widgets/menuController.dart';
 import 'package:frontend_app/network.dart';
 
 class TareasAlumnoPage extends StatefulWidget {
-  final int alumnoId; // Agregamos la propiedad para recibir el ID del alumno
+  final int alumnoId; // Propiedad para recibir el ID del alumno
 
   TareasAlumnoPage({Key? key, required this.alumnoId})
-      : super(key: key); // Modificamos el constructor para aceptar el ID
+      : super(key: key);
 
   @override
   _TareasAlumnoPageState createState() => _TareasAlumnoPageState();
@@ -19,8 +19,7 @@ class TareasAlumnoPage extends StatefulWidget {
 
 class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
   List<dynamic> tareasAsignadas = [];
-  Map<int, List<ElementoTarea>> elementosTareas =
-      {}; // Nuevo mapa para almacenar los elementos de cada tarea
+  Map<int, List<ElementoTarea>> elementosTareas = {};
   PageController _pageController = PageController();
 
   @override
@@ -35,6 +34,7 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     super.dispose();
   }
 
+  // Obtiene las tareas asignadas al alumno
   void _fetchAssignedTasks() async {
     try {
       final response = await fetchAllAssignedTasksForStudent(widget.alumnoId);
@@ -48,6 +48,7 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     }
   }
 
+  // Obtiene los elementos de cada tarea asignada
   void _fetchElementosTareas() async {
     try {
       for (var tarea in tareasAsignadas) {
@@ -61,6 +62,7 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     }
   }
 
+  // Devuelve el color correspondiente al tipo de tarea
   Color _getTareaColor(String tipo) {
     Map<String, Color> colors = {
       'Comanda': Colors.greenAccent,
@@ -70,6 +72,7 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     return colors[tipo] ?? Colors.grey; // Color gris como valor por defecto
   }
 
+  // Devuelve el icono correspondiente al ID de tarea
   IconData _getTareaIcon(int id) {
     List<IconData> icons = [
       Icons.check_circle_outline,
@@ -81,6 +84,7 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     return icons[id % icons.length];
   }
 
+  // Devuelve la imagen correspondiente al tipo de tarea
   String _getTareaImage(String tipo) {
     Map<String, String> tipoImagenes = {
       'Comanda': 'assets/pictogramas/tarea_comanda.png',
@@ -95,7 +99,7 @@ class _TareasAlumnoPageState extends State<TareasAlumnoPage> {
     return Scaffold(
       body: Column(
         children: [
-          botonSalir(),
+          botonSalir(), // Función para mostrar un botón de salida
           Padding(
             padding: EdgeInsets.all(16.0),
             child: Column(

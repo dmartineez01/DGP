@@ -17,17 +17,18 @@ class AlumnoInicioPage extends StatefulWidget {
 
 class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
 
-    @override
+  // Inicialización de locales para formateo de fechas en español
+  @override
   void initState() {
     super.initState();
     initializeDateFormatting('es_ES', null).then((_) {
       setState(() {
-        // Tu lógica que depende de los locales va aquí, por ejemplo, actualizar la UI
+        // La inicialización de locales permite formatear fechas en español
       });
     });
   }
 
-
+  // Construye la interfaz de usuario de la página principal del alumno
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,6 +50,7 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
     );
   }
 
+  // Construye la información del perfil del alumno en la parte superior de la página
   Widget _buildProfileInfo(String name, String imagePath) {
     return ListTile(
       leading: CircleAvatar(
@@ -61,90 +63,88 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
     );
   }
 
+  // Construye el indicador de días de la semana con íconos y colores
   Widget _buildDayIndicator() {
-  String todayFull = DateFormat('EEEE', 'es_ES').format(DateTime.now()).toLowerCase();
-  List<Map<String, dynamic>> days = [
-    {'name': 'lunes', 'icon': Icons.wb_sunny, 'color': Colors.yellow},
-    {'name': 'martes', 'icon': Icons.cloud, 'color': Colors.blue},
-    {'name': 'miércoles', 'icon': Icons.grass, 'color': Colors.green},
-    {'name': 'jueves', 'icon': Icons.water, 'color': Colors.teal},
-    {'name': 'viernes', 'icon': Icons.sports_soccer, 'color': Colors.orange},
-    {'name': 'sábado', 'icon': Icons.music_note, 'color': Colors.purple},
-    {'name': 'domingo', 'icon': Icons.cake, 'color': Colors.pink},
-  ];
+    String todayFull = DateFormat('EEEE', 'es_ES').format(DateTime.now()).toLowerCase();
+    List<Map<String, dynamic>> days = [
+      {'name': 'lunes', 'icon': Icons.wb_sunny, 'color': Colors.yellow},
+      {'name': 'martes', 'icon': Icons.cloud, 'color': Colors.blue},
+      {'name': 'miércoles', 'icon': Icons.grass, 'color': Colors.green},
+      {'name': 'jueves', 'icon': Icons.water, 'color': Colors.teal},
+      {'name': 'viernes', 'icon': Icons.sports_soccer, 'color': Colors.orange},
+      {'name': 'sábado', 'icon': Icons.music_note, 'color': Colors.purple},
+      {'name': 'domingo', 'icon': Icons.cake, 'color': Colors.pink},
+    ];
 
-  return Padding(
-    padding: EdgeInsets.symmetric(vertical: 8.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: days.map((day) {
-        bool isToday = todayFull == day['name'];
-        return Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Container(
-            padding: EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: isToday ? day['color'] : Colors.transparent,
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Row(
-              children: <Widget>[
-                Icon(day['icon'], color: isToday ? Colors.white : day['color'], size: 20),
-                SizedBox(width: 2),
-                Text(
-                  isToday ? day['name'].replaceFirst(day['name'][0], day['name'][0].toUpperCase()) : "",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: days.map((day) {
+          bool isToday = todayFull == day['name'];
+          return Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Container(
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: isToday ? day['color'] : Colors.transparent,
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Icon(day['icon'], color: isToday ? Colors.white : day['color'], size: 20),
+                  SizedBox(width: 2),
+                  Text(
+                    isToday ? day['name'].replaceFirst(day['name'][0], day['name'][0].toUpperCase()) : "",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      }).toList(),
-    ),
-  );
-}
+          );
+        }).toList(),
+      ),
+    );
+  }
 
-
-
-
+  // Construye tarjetas de acceso a funciones como historial y tareas
   Widget _buildAccessibleCard(String title, String imageAsset) {
     return GestureDetector(
       onTap: () {
-      if (title == 'TAREAS') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TareasAlumnoPage(alumnoId: widget.alumno['id']), // Pasamos el ID del alumno aquí
-          ),
-        );
-      } else if (title == 'HISTORIAL') {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HistorialAlumnoPage(alumnoId: widget.alumno['id']), // Pasamos el ID del alumno aquí
-          ),
-        );
-      
-      }
-    },
+        if (title == 'TAREAS') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TareasAlumnoPage(alumnoId: widget.alumno['id']), // Pasamos el ID del alumno aquí
+            ),
+          );
+        } else if (title == 'HISTORIAL') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HistorialAlumnoPage(alumnoId: widget.alumno['id']), // Pasamos el ID del alumno aquí
+            ),
+          );
+        }
+      },
       child: Card(
         elevation: 4.0,
         margin: EdgeInsets.symmetric(vertical: 10),
         child: Column(
           children: [
             Semantics(
-            label: 'Imagen representativa de $title', // Descripción alternativa para accesibilidad
-            child: Image.asset(
-              imageAsset,
-              height: 150, // Altura asignada para la imagen
-              fit: BoxFit.fitWidth,
+              label: 'Imagen representativa de $title', // Descripción alternativa para accesibilidad
+              child: Image.asset(
+                imageAsset,
+                height: 150, // Altura asignada para la imagen
+                fit: BoxFit.fitWidth,
+              ),
             ),
-          ),
             Container(
               padding: EdgeInsets.all(8),
               width: double.infinity,
@@ -161,7 +161,7 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
     );
   }
 
-
+  // Construye el botón de salida de la aplicación
   Widget _buildExitButton() {
     return Padding(
       padding: EdgeInsets.all(16.0),
@@ -172,7 +172,7 @@ class _AlumnoInicioPageState extends State<AlumnoInicioPage> {
         style: ElevatedButton.styleFrom(
           primary: Colors.red,
           onPrimary: Colors.white,
-          minimumSize: Size(double.infinity, 50), // make it stretch
+          minimumSize: Size(double.infinity, 50), // Hace que el botón se estire
         ),
       ),
     );

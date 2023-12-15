@@ -1,3 +1,4 @@
+// Importación de bibliotecas necesarias.
 import 'package:flutter/material.dart';
 import 'package:frontend_app/AdminPage/Alumnos/editarAlumnoPage.dart';
 import '../../network.dart';
@@ -6,9 +7,11 @@ import 'agregarEstudiante.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+// Clase que representa la página de administración de un alumno.
 class AlumnoAdminPage extends StatefulWidget {
   final dynamic alumno;
 
+  // Constructor que recibe datos del alumno.
   AlumnoAdminPage({Key? key, required this.alumno}) : super(key: key);
 
   @override
@@ -26,6 +29,7 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
     _fetchAssignedTasks();
   }
 
+  // Función para actualizar los datos del alumno.
   void _updateAlumnoData(dynamic updatedAlumno) {
     setState(() {
       _alumnoData = updatedAlumno;
@@ -33,10 +37,10 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
     });
   }
 
+  // Función para obtener las tareas asignadas al alumno.
   void _fetchAssignedTasks() async {
     try {
-      final response =
-          await fetchAllAssignedTasksForStudent(widget.alumno['id']);
+      final response = await fetchAllAssignedTasksForStudent(widget.alumno['id']);
 
       setState(() {
         tareasAsignadas = response;
@@ -46,6 +50,7 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
     }
   }
 
+  // Función para obtener los datos actualizados del alumno.
   void _fetchAlumnoData() async {
     try {
       final alumnoData = await fetchAlumno(widget.alumno['id']);
@@ -69,15 +74,19 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('Información del Alumno',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text(
+                'Información del Alumno',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
               Divider(),
               Text('Nombre: ${_alumnoData['nombre']}',
                   style: TextStyle(fontSize: 18)),
               Text('ID: ${_alumnoData['id']}'),
               SizedBox(height: 20),
-              Text('Tareas Asignadas',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text(
+                'Tareas Asignadas',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
               Divider(),
               Divider(),
               Container(
@@ -88,24 +97,24 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
                   itemCount: tareasAsignadas.length,
                   itemBuilder: (BuildContext context, int index) {
                     final tarea = tareasAsignadas[index];
-    return ListTile(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: tarea.entries
-          .where((entry) => entry.value != null) // Filtra las entradas que no son null
-          .map<Widget>((entry) {
-            return Text(
-              '${entry.key}: ${entry.value}',
-              style: TextStyle(fontSize: 16),
-            );
-          }).toList(),
-      ),
-    );
-  },
-                separatorBuilder: (BuildContext context, int index) {
-                  return Divider();
-                },
-              ),
+                    return ListTile(
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: tarea.entries
+                            .where((entry) => entry.value != null) // Filtra las entradas que no son null
+                            .map<Widget>((entry) {
+                          return Text(
+                            '${entry.key}: ${entry.value}',
+                            style: TextStyle(fontSize: 16),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return Divider();
+                  },
+                ),
               ),
               SizedBox(height: 20),
               ElevatedButton.icon(
@@ -178,8 +187,7 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
     );
   }
 
-  // ... (Resto del código de AlumnoAdminPage)
-
+  // Función para mostrar el diálogo de asignación de tarea.
   void _showAssignTaskDialog() {
     var localContext = context; // Obtener una referencia local al contexto
 
@@ -190,8 +198,7 @@ class _AlumnoAdminPageState extends State<AlumnoAdminPage> {
           title: Text('Asignar Tarea'),
           content: FutureBuilder<List<dynamic>>(
             future: fetchTareas(),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+            builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
               } else if (snapshot.hasError) {
