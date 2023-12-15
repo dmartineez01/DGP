@@ -11,19 +11,21 @@ app.use(bodyParser.urlencoded({ extended: true })); // para peticiones con cuerp
 
 app.use(cors());
 
-// Modificar la conexión para que utilice 'APPDGP' como nombre de la base de datos
+// Configuración de la conexión a la base de datos MySQL
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
-    database: 'APPDGP'  // Aquí especificamos el nombre de tu base de datos directamente
+    database: 'APPDGP'  // Aquí especificamos el nombre de la base de datos directamente
 });
 
+// Conexión a la base de datos
 db.connect((err) => {
     if(err) throw err;
     console.log('Connected to the database');
 });
 
+// Ruta principal que responde con un mensaje de saludo
 app.get('/', (req, res) => {
     res.send('Hola desde Node.js con MySQL!');
 });
@@ -39,11 +41,11 @@ app.get('/administradores', (req, res) => {
     });
 });
 
-// en tu server.js o donde tengas tus rutas
-
+// Ruta para realizar la autenticación de administradores
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
+    // Consulta para buscar un administrador por nombre de usuario
     db.query('SELECT * FROM administrador WHERE username = ?', [username], (err, results) => {
         if (err) {
             res.status(500).send("Error en la consulta");
@@ -59,8 +61,7 @@ app.post('/login', (req, res) => {
 });
 
 
-// Implementamos a los alumnos en la base de datos
-
+// Ruta para obtener la lista de alumnos
 app.get('/alumnos', (req, res) => {
     db.query('SELECT * FROM alumnos', (err, rows) => {
         if (err) {
@@ -71,8 +72,7 @@ app.get('/alumnos', (req, res) => {
     });
 });
 
-// En tu archivo de rutas de Node.js
-
+// Ruta para obtener los detalles de un alumno por ID
 app.get('/alumnos/:id', (req, res) => {
     const { id } = req.params;
     db.query('SELECT * FROM alumnos WHERE id = ?', [id], (err, results) => {
@@ -89,6 +89,7 @@ app.get('/alumnos/:id', (req, res) => {
     });
 });
 
+// Ruta para obtener tareas asignadas a un alumno por ID
 app.get('/alumnos/:id/tareas-asignadas', (req, res) => {
     const { id } = req.params;
     const query = `
@@ -118,17 +119,13 @@ app.get('/alumnos/:id/tareas-asignadas', (req, res) => {
 });
 
 
-
-
-
-
-
 // Ruta para agregar un nuevo alumno
 app.post('/alumnos', (req, res) => {
 
     const { nombre, password, imagen, texto, audio } = req.body;
     console.log('Recibido:', { nombre, password, imagen, texto, audio }); // Para depuración
 
+    // Inserción de un nuevo alumno en la base de datos
     db.query('INSERT INTO alumnos (nombre, password, imagen, texto, audio) VALUES (?, ?, ?, ?, ?)', 
     [nombre, password, imagen, texto, audio], (err, results) => {
         if (err) {
@@ -139,6 +136,7 @@ app.post('/alumnos', (req, res) => {
     });
 });
 
+// Ruta para eliminar un alumno por ID
 app.delete('/alumnos/:id', (req, res) => {
     const { id } = req.params;
 
@@ -151,11 +149,12 @@ app.delete('/alumnos/:id', (req, res) => {
     });
 });
 
-
+// Ruta para actualizar los datos de un alumno por ID
 app.put('/alumnos/:id', (req, res) => {
     const { id } = req.params;
     const { nombre, Imagen, Texto, Audio, password } = req.body;
 
+    // Actualización de los datos de un alumno por su ID
     db.query('UPDATE alumnos SET nombre = ?, Imagen = ?, Texto = ?, Audio = ?, password = ? WHERE id = ?',
         [nombre, Imagen, Texto, Audio, password, id],
         (err, results) => {
@@ -170,6 +169,7 @@ app.put('/alumnos/:id', (req, res) => {
 
 //----------------------- CREACION DE TAREAS Y ELEMENTO TAREAS -------------------------------//
 
+// Ruta para obtener todas las tareas
 app.get('/tareas', (req, res) => {
     db.query('SELECT * FROM tareas', (error, results) => {
         if (error) {
@@ -179,10 +179,12 @@ app.get('/tareas', (req, res) => {
     });
 });
 
+// Ruta para agregar una nueva tarea
 app.post('/tareas', (req, res) => {
     const { nombre, tipo } = req.body;
 
     console.log('Agrego esta tarea: nombre:' + nombre + " tipo: " + tipo);
+    // Inserción de una nueva tarea en la base de datos
     db.query('INSERT INTO tareas (nombre, tipo) VALUES (?, ?)', [nombre, tipo], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -193,10 +195,12 @@ app.post('/tareas', (req, res) => {
 
 // Backend: En tu servidor Express (Node.js)
 
+// Ruta para eliminar una tarea por ID
 app.delete('/tareas/:id', (req, res) => {
     const { id } = req.params;
 
     console.log('Eliminando tarea con ID:', id);
+    // Eliminación de una tarea por su ID
     db.query('DELETE FROM tareas WHERE id = ?', [id], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -208,9 +212,12 @@ app.delete('/tareas/:id', (req, res) => {
     });
 });
 
+// Ruta para obtener elementos de una tarea por ID de tarea
 app.post('/tareas/:id/elementos', (req, res) => {
     const tareaId = req.params.id;
     const { pictograma, descripcion, sonido, video } = req.body;
+
+    // Inserción de un nuevo elemento de tarea en la base de datos
     db.query('INSERT INTO elementoTarea (pictograma, descripcion, sonido, video, tarea_id) VALUES (?, ?, ?, ?, ?)', [pictograma, descripcion, sonido, video, tareaId], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -219,9 +226,11 @@ app.post('/tareas/:id/elementos', (req, res) => {
     });
 });
 
+// Ruta para obtener elementos de una tarea por ID de tarea
 app.get('/tareas/:id/elementos', (req, res) => {
     const tareaId = req.params.id;
 
+    // Consulta para obtener elementos de una tarea por su ID
     db.query('SELECT * FROM elementoTarea WHERE tarea_id = ?', [tareaId], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -231,8 +240,6 @@ app.get('/tareas/:id/elementos', (req, res) => {
 });
 
 //---------------------------------------------
-
-// ...
 
 app.post('/alumnos/:alumnoId/asignar-material', (req, res) => {
     const { tarea_id } = req.body;
@@ -272,10 +279,12 @@ app.post('/material-elemento', (req, res) => {
     });
 });
 
+// Ruta para actualizar el estado de completada de una tarea de material asignada a un alumno
 app.patch('/alumnos/:alumnoId/materiales-asignados/:tareaId/completar', (req, res) => {
     const { alumnoId, tareaId } = req.params;
     const { completada, ultimoPaso } = req.body; // Este valor debe ser TRUE o FALSE
 
+    // Actualiza el estado de completada y el último paso de una tarea de material asignada
     db.query('UPDATE MaterialAsignada SET completada = ?, ultimo_paso = ? WHERE alumno_id = ? AND id = ?', [completada, ultimoPaso, alumnoId, tareaId], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -291,6 +300,7 @@ app.post('/alumnos/:alumnoId/asignar-tarea-fija', (req, res) => {
 
     console.log(tarea_id, alumno_id);
 
+    // Inserta un registro en la tabla "FijaAsignada" para asignar una tarea fija a un alumno
     db.query('INSERT INTO FijaAsignada (alumno_id, tarea_id) VALUES (?, ?)', [alumno_id, tarea_id], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -371,6 +381,7 @@ app.patch('/alumnos/:alumnoId/tareas-comandas/:tareaId/completar', (req, res) =>
 
 //------------------------------------------
 
+// Ruta para obtener un listado de aulas
 app.get('/aulas', (req, res) => {
     db.query('SELECT * FROM Aula', (error, results) => {
         if (error) {
@@ -385,8 +396,7 @@ app.get('/aulas', (req, res) => {
     });
 });
 
-// En tu archivo server.js (o el archivo donde tengas tu servidor Express)
-
+// Ruta para agregar un nuevo elemento a una comanda asignada a un alumno
 app.post('/comanda-elemento', (req, res) => {
     const { comandaAsignada_id, elementoTarea_id, cantidad, id_aula } = req.body;
 
@@ -395,20 +405,22 @@ app.post('/comanda-elemento', (req, res) => {
         return res.status(400).send('Faltan datos requeridos');
     }
 
+    // Define la consulta SQL para insertar un nuevo registro en la tabla ComandaElemento
     const query = 'INSERT INTO ComandaElemento (comandaAsignada_id, elementoTarea_id, cantidad, id_aula) VALUES (?, ?, ?, ?)';
     
+    // Ejecuta la consulta SQL utilizando los valores proporcionados en la solicitud
     db.query(query, [comandaAsignada_id, elementoTarea_id, cantidad, id_aula], (error, results) => {
         if (error) {
             console.error('Error al insertar en ComandaElemento:', error);
             return res.status(500).json({ error: 'Error interno del servidor' });
         }
+        // Devuelve una respuesta JSON con un mensaje de éxito y el ID del elemento creado
         res.json({ success: true, message: 'ComandaElemento creado exitosamente', id: results.insertId });
     });
 });
 
-//---------------------------
 
-// Backend: En tu servidor Express (Node.js)
+//---------------------------
 
 // Endpoint para obtener la cantidad de un elemento en MaterialElemento
 app.get('/material-elemento/:id', (req, res) => {
@@ -426,6 +438,7 @@ app.get('/material-elemento/:id', (req, res) => {
     });
 });
 
+// Ruta para obtener una tarea asignada a un alumno por tipo y ID específico
 app.get('/alumnos/:alumnoId/tareas/:tipo/:id', (req, res) => {
     const { alumnoId, tipo, id } = req.params;
 
@@ -440,7 +453,10 @@ app.get('/alumnos/:alumnoId/tareas/:tipo/:id', (req, res) => {
         return res.status(400).json({ error: "Tipo de tarea no válido" });
     }
 
+    // Construye una consulta SQL dinámica utilizando el tipo de tarea y el ID proporcionados
     const query = `SELECT * FROM ${tableName} WHERE alumno_id = ? AND id = ?`;
+    
+    // Ejecuta la consulta SQL
     db.query(query, [alumnoId, id], (error, results) => {
         if (error) {
             return res.status(500).json({ error });
@@ -484,10 +500,9 @@ app.get('/tareas-completadas', (req, res) => {
     });
 });
 
-
+// Endpoint para confirmar una tarea
   
-  
-  app.post('/confirmar-tarea', (req, res) => {
+app.post('/confirmar-tarea', (req, res) => {
     const { asignadaId, tareaId, alumnoId, nombre, tipo } = req.body;
   
     db.beginTransaction((err) => {
@@ -502,7 +517,7 @@ app.get('/tareas-completadas', (req, res) => {
           });
         }
   
-        // Elimina de la tabla de tarea asignada
+        // Elimina de la tabla de tarea asignada (según el tipo)
         const deleteTareaAsignada = `DELETE FROM ${tipo}Asignada WHERE id = ?`;
         db.query(deleteTareaAsignada, [asignadaId], (error, results) => {
           if (error) {
@@ -532,7 +547,9 @@ app.get('/tareas-completadas', (req, res) => {
         });
       });
     });
-  });
+});
+
+// Ruta para obtener las tareas finalizadas
 
   app.get('/tareas-finalizadas', (req, res) => {
     const query = `
@@ -549,6 +566,7 @@ app.get('/tareas-completadas', (req, res) => {
     });
   });
   
+// Ruta para obtener el historial de un determinado alumno
   app.get('/historial-alumno/:alumnoId', (req, res) => {
     const { alumnoId } = req.params;
     const query = `
