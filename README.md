@@ -93,4 +93,4 @@ Las contribuciones son bienvenidas. Si deseas contribuir a este proyecto, sigue 
 
 ## Autor
 
-Este proyecto fue desarrollado por Accessibility Coders.
+Este proyecto fue desarrollado por **Accessibility Coders**.
